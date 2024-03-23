@@ -3,7 +3,7 @@ export { FixedIcon } from './fixed-icon';
 export { LiquidIcon } from './liquid-icon';
 export { ResponsiveIcon } from './responsive-icon';
 
-// TODO : this icon area need to be checked in Pixer.
+// TODO : this icon area need to be checked in Shwupit.
 
 // export { FruitsVegetable } from './fruits-vegetable';
 // export { FacialCare } from './facial-care';

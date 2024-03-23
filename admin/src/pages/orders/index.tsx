@@ -80,7 +80,7 @@ export default function Orders() {
     }
   }
 
-  // TODO : this area need to be checked in Pixer
+  // TODO : this area need to be checked in Shwupit
 
   return (
     <>

@@ -97,7 +97,7 @@ export default function Orders() {
     router.replace(Routes.dashboard);
   }
 
-  // TODO : this area need to be checked in Pixer
+  // TODO : this area need to be checked in Shwupit
 
   return (
     <>

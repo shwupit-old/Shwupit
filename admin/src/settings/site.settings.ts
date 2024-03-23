@@ -6,14 +6,14 @@ import {
 } from '@/utils/auth-utils';
 import { Routes } from '@/config/routes';
 
-// TODO : this area need to be checked in Pixer
+// TODO : this area need to be checked in Shwupit
 
 export const siteSettings = {
-  name: 'Pixer',
+  name: 'Shwup',
   description: '',
   logo: {
     url: '/logo.svg',
-    alt: 'Pixer',
+    alt: 'Shwup',
     href: '/',
     width: 138,
     height: 34,
@@ -27,7 +27,7 @@ export const siteSettings = {
   },
   defaultLanguage: 'en',
   author: {
-    name: 'RedQ',
+    name: 'Shwupit',
     websiteUrl: 'https://redq.io',
     address: '',
   },

@@ -190,7 +190,7 @@ export default function OrderDetailsPage() {
     },
   ];
 
-  // TODO : this area need to be checked in Pixer
+  // TODO : this area need to be checked in Shwupit
 
   return (
     <>

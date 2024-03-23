@@ -21,7 +21,7 @@ export const settingsValidationSchema = yup.object().shape({
     .transform((value) => (isNaN(value) ? undefined : value))
     .moreThan(-1, 'form:error-sale-price-must-positive'),
   /**
-   * Commenting for Pixer only
+   * Commenting for Shwupit only
    *
    * */
   //   freeShippingAmount: yup

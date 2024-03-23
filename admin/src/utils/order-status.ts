@@ -3,7 +3,7 @@ import { PaymentStatus } from '@/types';
 export const ORDER_STATUS = [
   { name: 'text-order-pending', status: 'order-pending', serial: 1 },
   { name: 'text-order-processing', status: 'order-processing', serial: 2 },
-  /** #### Pixer Only  */ 
+  /** #### Shwupit Only  */ 
   // { name: 'text-order-at-local-facility', status: 'order-at-local-facility', serial: 3, },
   // { name: 'text-order-out-for-delivery', status: 'order-out-for-delivery', serial: 4, },
   { name: 'text-order-completed', status: 'order-completed', serial: 5 },

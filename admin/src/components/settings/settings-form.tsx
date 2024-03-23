@@ -183,7 +183,7 @@ type FormValues = {
   emailEvent: any;
   server_info: ServerInfo;
   /**
-   * For Pixer Only
+   * For Shwupit Only
    */
   // guestCheckout: boolean;
   // useOtp: boolean;

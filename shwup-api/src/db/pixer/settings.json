@@ -32,7 +32,7 @@
       "original": "https://pixarlaravel.s3.ap-southeast-1.amazonaws.com/932/pixer_light.png",
       "thumbnail": "https://pixarlaravel.s3.ap-southeast-1.amazonaws.com/932/conversions/pixer_light-thumbnail.jpg"
     },
-    "siteTitle": "Pixer",
+    "siteTitle": "Shwupit",
     "siteSubtitle": "Your next ecommerce",
     "currency": "USD",
     "taxClass": "1",
@@ -95,8 +95,8 @@
     "useAi": false,
     "defaultAi": "openai",
     "siteLink": "https://pixer.redq.io",
-    "copyrightText": "Copyright © REDQ. All rights reserved worldwide.",
-    "externalText": "REDQ",
+    "copyrightText": "Copyright © Shwupit. All rights reserved worldwide.",
+    "externalText": "Shwupit",
     "externalLink": "https://redq.io",
     "smsEvent": {
       "admin": {
@@ -143,7 +143,7 @@
         "overlayColorRange": null,
         "description": "We are currently undergoing essential maintenance to elevate your browsing experience. Our team is working diligently to implement improvements that will bring you an even more seamless and enjoyable interaction with our site. During this period, you may experience temporary inconveniences. We appreciate your patience and understanding. Thank you for being a part of our community, and we look forward to unveiling the enhanced features and content soon.",
         "newsLetterDescription": "Stay in the loop! Subscribe to our newsletter for exclusive deals and the latest trends delivered straight to your inbox. Elevate your shopping experience with insider access.",
-        "aboutUsDescription": "Welcome to Pixer, your go-to destination for curated excellence. Discover a fusion of style, quality, and affordability in every click. Join our community and elevate your shopping experience with us!",
+        "aboutUsDescription": "Welcome to Shwupit, your go-to destination for curated excellence. Discover a fusion of style, quality, and affordability in every click. Join our community and elevate your shopping experience with us!",
         "image": {
             "id": 1794,
             "file_name": "background.png",

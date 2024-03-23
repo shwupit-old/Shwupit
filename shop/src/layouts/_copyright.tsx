@@ -8,13 +8,13 @@ export default function Copyright({ className }: { className?: string }) {
   const { settings } = useSettings();
   return (
     <span className={cn('tracking-[0.2px]', className)}>
-      ©{currentYear}{' '}
+      ©{currentYear}
       <Link
         className="text-heading font-medium hover:text-brand-dark"
         href={settings?.siteLink ?? routes?.home}
         target="_blank"
       >
-        {settings?.siteTitle}
+       {' Shwupit'}
       </Link>
       . {settings?.copyrightText}{' '}
       {settings?.externalText ? (
