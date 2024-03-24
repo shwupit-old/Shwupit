@@ -74,8 +74,9 @@ export default function Header({
           <SearchButton className="hidden sm:flex" />
           <ThemeSwitcher />
           {/* <GridSwitcher /> */}
-       {asPath !== routes.checkout && (
+       {asPath !== routes.wishlists && (
             <a href="/wishlists" className="hidden sm:flex">
+                // TODO: Fix the button
               <FavoriteButton />
             </a>
           )}
