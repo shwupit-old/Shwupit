@@ -1,7 +1,7 @@
 import { useDrawer } from '@/components/drawer-views/context';
 import { CloseIcon } from '@/components/icons/close-icon';
 import { DiscoverIcon } from '@/components/icons/discover-icon';
-import { FeedIcon } from '@/components/icons/feed-icon';
+import { SwapIcon } from '@/components/icons/swap-icon';
 import { HelpIcon } from '@/components/icons/help-icon';
 import { HomeIcon } from '@/components/icons/home-icon';
 import { PaperPlaneIcon } from '@/components/icons/paper-plane-icon';
@@ -115,7 +115,7 @@ export function Sidebar({
               title={t('text-swaps')}
               href={routes.feed}
               isCollapse={isCollapse}
-              icon={<FeedIcon className="h-[17px] w-[17px] text-current" />}
+              icon={<SwapIcon className="h-[17px] w-[17px] text-current" />}
             /> 
 
             <NavLink

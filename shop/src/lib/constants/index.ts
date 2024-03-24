@@ -31,8 +31,8 @@ export const AuthorizedMenuItems = [
     path: routes.profile,
   },
   {
-    label: 'text-auth-purchase',
-    path: routes.purchases,
+    label: 'text-auth-swap-disputes',
+    path: routes.disputes,
   },
   {
     label: 'text-auth-wishlist',

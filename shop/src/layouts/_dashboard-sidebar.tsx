@@ -26,12 +26,12 @@ const menuItems = [
     label: 'text-auth-editprofile',
     path: routes.profile,
   },
-  {
-    id: 2,
-    icon: <PurchaseIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
-    label: 'text-auth-purchase',
-    path: routes.purchases,
-  },
+  // {
+  //   id: 2,
+  //   icon: <PurchaseIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
+  //   label: 'text-auth-swap-disputes',
+  //   path: routes.purchases,
+  // },
   {
     id: 3,
     icon: <CreditCardIcon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />,
@@ -47,15 +47,15 @@ const menuItems = [
   {
     id: 5,
     icon: <ReportIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
-    label: 'text-my-reports-title',
-    path: routes.reports,
+    label: 'text-my-disputes',
+    path: routes.disputes,
   },
-  {
-    id: 6,
-    icon: <InformationIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
-    label: 'text-my-question-title',
-    path: routes.questions,
-  },
+  // {
+  //   id: 6,
+  //   icon: <InformationIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
+  //   label: 'text-my-question-title',
+  //   path: routes.questions,
+  // },
   // {
   //   id: 7,
   //   icon: <UserFollowingIcon className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,

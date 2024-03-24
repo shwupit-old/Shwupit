@@ -8,6 +8,7 @@ const routes = {
   purchases: '/purchases',
   wishlists: '/wishlists',
   reports: '/reports',
+  disputes: '/disputes',
   questions: '/questions',
   profile: '/profile',
   checkout: '/checkout',
