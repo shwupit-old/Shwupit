@@ -99,7 +99,7 @@ const FollowedAuthorsPage: NextPageWithLayout = () => {
             disabled={isLoadingMore}
             isLoading={isLoadingMore}
           >
-            Load more
+            Discover More
           </Button>
         </div>
       )}

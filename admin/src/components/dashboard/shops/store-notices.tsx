@@ -67,7 +67,7 @@ function StoreNotices() {
       )}
 
       {hasNextPage && (
-        <div className="mt-8 grid place-content-center md:mt-10">
+        <div className="mt-8 grid place-content-center md:mt-10 w-3/4 md:w-1/2 lg:w-2/5">
           <Button onClick={loadMore} loading={isLoadingMore}>
             {t('common:text-load-more')}
           </Button>

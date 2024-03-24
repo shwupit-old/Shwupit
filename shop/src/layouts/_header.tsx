@@ -1,4 +1,6 @@
 import CartButton from '@/components/cart/cart-button';
+import FavoriteButton from '@/components/favorite/favorite-button';
+
 import GridSwitcher from '@/components/product/grid-switcher';
 import SearchButton from '@/components/search/search-button';
 import Alert from '@/components/ui/alert';
@@ -71,9 +73,11 @@ export default function Header({
         <div className="relative flex items-center gap-5 pr-0.5 xs:gap-6 sm:gap-7">
           <SearchButton className="hidden sm:flex" />
           <ThemeSwitcher />
-          <GridSwitcher />
-          {asPath !== routes.checkout && (
-            <CartButton className="hidden sm:flex" />
+          {/* <GridSwitcher /> */}
+       {asPath !== routes.checkout && (
+            <a href="/wishlists" className="hidden sm:flex">
+              <FavoriteButton />
+            </a>
           )}
           {isMultiLangEnable ? (
             <div className="ltr:ml-auto rtl:mr-auto">

@@ -23,7 +23,7 @@ const menuItems = [
   {
     id: 1,
     icon: <UserIconAlt className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />,
-    label: 'text-auth-profile',
+    label: 'text-auth-editprofile',
     path: routes.profile,
   },
   {
@@ -56,20 +56,20 @@ const menuItems = [
     label: 'text-my-question-title',
     path: routes.questions,
   },
+  // {
+  //   id: 7,
+  //   icon: <UserFollowingIcon className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
+  //   label: 'text-followed-authors',
+  //   path: routes.followedShop,
+  // },
   {
     id: 7,
-    icon: <UserFollowingIcon className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
-    label: 'text-followed-authors',
-    path: routes.followedShop,
-  },
-  {
-    id: 8,
     icon: <LockIcon className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
     label: 'text-auth-password',
     path: routes.password,
   },
   {
-    id: 9,
+    id: 8,
     icon: <CreditCardIcon className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
     label: 'Wallet',
     path: routes.wallet,
