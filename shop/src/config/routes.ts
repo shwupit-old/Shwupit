@@ -6,6 +6,7 @@ const routes = {
   about: '/about-us',
   contact: '/contact-us',
   purchases: '/purchases',
+  createSwap: '/swaps/create',
   wishlists: '/wishlists',
   reports: '/reports',
   disputes: '/disputes',

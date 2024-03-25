@@ -1,6 +1,4 @@
 import CartButton from '@/components/cart/cart-button';
-import FavoriteButton from '@/components/favorite/favorite-button';
-
 import GridSwitcher from '@/components/product/grid-switcher';
 import SearchButton from '@/components/search/search-button';
 import Alert from '@/components/ui/alert';
@@ -10,6 +8,7 @@ import LanguageSwitcher from '@/components/ui/language-switcher';
 import LoginMenu from '@/components/ui/login-button';
 import Logo from '@/components/ui/logo';
 import ThemeSwitcher from '@/components/ui/theme-switcher';
+import NotificationSwitcher from '@/components/ui/notifications';
 import routes from '@/config/routes';
 import { useSettings } from '@/data/settings';
 import {
@@ -21,6 +20,7 @@ import {
 import { useSwapBodyClassOnScrollDirection } from '@/lib/hooks/use-swap-body-class';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'next-i18next';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useWindowSize } from 'react-use';
 
@@ -72,13 +72,10 @@ export default function Header({
         </div>
         <div className="relative flex items-center gap-5 pr-0.5 xs:gap-6 sm:gap-7">
           <SearchButton className="hidden sm:flex" />
-          <ThemeSwitcher />
-          {/* <GridSwitcher /> */}
-       {asPath !== routes.wishlists && (
-            <a href="/wishlists" className="hidden sm:flex">
-                // TODO: Fix the button
-              <FavoriteButton />
-            </a>
+          <NotificationSwitcher />
+
+          {asPath !== routes.checkout && (
+            <CartButton className="hidden sm:flex" />
           )}
           {isMultiLangEnable ? (
             <div className="ltr:ml-auto rtl:mr-auto">
@@ -87,14 +84,15 @@ export default function Header({
           ) : (
             ''
           )}
-          <a
-            href={`${process.env.NEXT_PUBLIC_ADMIN_URL}/register`}
-            target="_blank"
+
+          <Link
+            href={routes.createSwap}
+            target="_self"
             rel="noreferrer"
-            className="focus:ring-accent-700 hidden h-9 shrink-0 items-center justify-center rounded border border-transparent bg-brand px-3 py-0 text-sm font-semibold leading-none text-light outline-none transition duration-300 ease-in-out hover:bg-brand-dark focus:shadow focus:outline-none focus:ring-1 sm:inline-flex"
+            className="focus:ring-accent-700 hidden h-9 shrink-0 items-center justify-center border-transparent bg-brand px-3 py-0 text-sm font-semibold leading-none text-light outline-none transition duration-300 ease-in-out hover:bg-brand-dark focus:shadow focus:outline-none focus:ring-1 sm:inline-flex"
           >
             {t('text-become-seller')}
-          </a>
+          </Link>
           <LoginMenu />
         </div>
       </header>

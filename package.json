@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "react-query": "^3.39.3",
     "yarn": "^1.22.22"
   }
 }

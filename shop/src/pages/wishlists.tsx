@@ -19,7 +19,8 @@ import classNames from 'classnames';
 import { HeartFillIcon } from '@/components/icons/heart-fill';
 import Link from '@/components/ui/link';
 
-function WishlistItem({ product }: { product: Product }) {
+
+export function WishlistItem({ product }: { product: Product }) {
   const { removeFromWishlist, isLoading } = useRemoveFromWishlist();
   const {
     id,

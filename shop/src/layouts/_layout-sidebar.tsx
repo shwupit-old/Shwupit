@@ -9,12 +9,16 @@ import { PeopleIcon } from '@/components/icons/people-icon';
 import { ProductIcon } from '@/components/icons/product-icon';
 import { SettingIcon } from '@/components/icons/setting-icon';
 import ActiveLink from '@/components/ui/links/active-link';
+import { ThemeLightIcon } from '@/components/icons/theme-light-icon';
+import { ThemeDarkIcon } from '@/components/icons/theme-dark-icon';
 import Logo from '@/components/ui/logo';
 import Scrollbar from '@/components/ui/scrollbar';
 import routes from '@/config/routes';
 import Copyright from '@/layouts/_copyright';
 import cn from 'classnames';
+import ThemeSwitcher from '@/components/ui/theme-switcher';
 import { useTranslation } from 'next-i18next';
+import { useTheme } from 'next-themes';
 import { useWindowSize } from 'react-use';
 import {
   isMultiLangEnable,
@@ -25,12 +29,15 @@ import {
 import { useAtom } from 'jotai';
 import { twMerge } from 'tailwind-merge';
 
+
+
 interface NavLinkProps {
   href: string;
   title: string;
   icon: React.ReactNode;
   isCollapse?: boolean;
 }
+
 
 function NavLink({ href, icon, title, isCollapse }: NavLinkProps) {
   return (
@@ -70,6 +77,13 @@ export function Sidebar({
   const { width } = useWindowSize();
   const [underMaintenanceIsComing] = useAtom(checkIsMaintenanceModeComing);
   const [isScrolling] = useAtom(checkIsScrollingStart);
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDarkMode = resolvedTheme === 'dark';
+  const themeSwitchText = isDarkMode ? t('text-theme-light') : t('text-theme-dark');
+  
+const toggleTheme = () => {
+  setTheme(isDarkMode ? 'light' : 'dark');
+};
   return (
     <aside
       className={twMerge(
@@ -98,12 +112,7 @@ export function Sidebar({
               isCollapse={isCollapse}
               icon={<DiscoverIcon className="h-[18px] w-[18px] text-current" />}
             />
-            {/* <NavLink
-              title={t('text-popular-products')}
-              href={routes.popularProducts}
-              isCollapse={isCollapse}
-              icon={<ProductIcon className="h-4 w-4 text-current" />}
-            /> */}
+
             {/* <NavLink
               title={t('text-top-authors')}
               href={routes.authors}
@@ -111,12 +120,12 @@ export function Sidebar({
               icon={<PeopleIcon className="h-[18px] w-[18px] text-current" />}
             /> */}
 
-             <NavLink
+            <NavLink
               title={t('text-swaps')}
               href={routes.feed}
               isCollapse={isCollapse}
               icon={<SwapIcon className="h-[17px] w-[17px] text-current" />}
-            /> 
+            />
 
             <NavLink
               title={t('text-contact')}
@@ -126,6 +135,24 @@ export function Sidebar({
                 <PaperPlaneIcon className="h-[18px] w-[18px] text-current" />
               }
             />
+      <div
+  className="my-0.5 flex items-center gap-1 px-4 py-3 hover:bg-light-300 hover:dark:bg-dark-300 xs:px-6 sm:my-1 sm:gap-1.5 sm:px-7 lg:gap-2 xl:my-0.5 cursor-pointer"
+  onClick={toggleTheme}
+>
+  {isDarkMode ? (
+    <ThemeLightIcon className="h-5 w-5" />
+  ) : (
+    <ThemeDarkIcon className="h-[19px] w-[19px]" />
+  )}
+  <span
+    className={cn(
+      'ml-2 text-dark-100 dark:text-light-400',
+      isCollapse ? 'inline-flex xl:hidden' : 'hidden xl:inline-flex'
+    )}
+  >
+    {themeSwitchText}
+  </span>
+</div>
           </nav>
 
           <nav className="mt-auto flex flex-col pb-4">
