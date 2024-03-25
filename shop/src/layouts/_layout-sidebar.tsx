@@ -20,6 +20,7 @@ import ThemeSwitcher from '@/components/ui/theme-switcher';
 import { useTranslation } from 'next-i18next';
 import { useTheme } from 'next-themes';
 import { useWindowSize } from 'react-use';
+import { useState, useEffect } from 'react';
 import {
   isMultiLangEnable,
   checkIsMaintenanceModeComing,
@@ -77,9 +78,20 @@ export function Sidebar({
   const { width } = useWindowSize();
   const [underMaintenanceIsComing] = useAtom(checkIsMaintenanceModeComing);
   const [isScrolling] = useAtom(checkIsScrollingStart);
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDarkMode = resolvedTheme === 'dark';
+  const { resolvedTheme, setTheme, systemTheme } = useTheme();
+  const [isClient, setIsClient] = useState(false);
+
+
+
+  useEffect(() => {
+    // Mark that we are now on the client and can access themes safely
+    setIsClient(true);
+  }, []);
+
+  const isDarkMode = isClient ? resolvedTheme === 'dark' : systemTheme === 'dark';
   const themeSwitchText = isDarkMode ? t('text-theme-light') : t('text-theme-dark');
+
+  
   
 const toggleTheme = () => {
   setTheme(isDarkMode ? 'light' : 'dark');
