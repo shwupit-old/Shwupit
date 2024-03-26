@@ -1,5 +1,3 @@
-version: '3.8'
-
 services: 
   db:
     image: cassandra:latest
@@ -11,7 +9,6 @@ services:
       - "9042:9042"
     networks:
       - cassandra_net
-
   cqlsh_setup:
     image: nuvo/docker-cqlsh
     depends_on:
@@ -25,7 +22,6 @@ services:
     command: ["sh", "-c", "sleep 30 && cqlsh -f ./data.cql"]
     networks:
       - cassandra_net
-
   cqlsh_interactive:
     image: nuvo/docker-cqlsh
     depends_on: 
@@ -39,12 +35,9 @@ services:
     entrypoint: ["/bin/bash", "-c", "echo 'Connected to Test Cluster at cassandra:9042. Use HELP for help.' && /bin/bash"]
     networks:
       - cassandra_net
-
-
 networks:
   cassandra_net:
     driver: bridge
-
 volumes:
   cassandra_data:
     driver: local
