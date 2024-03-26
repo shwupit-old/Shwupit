@@ -84,7 +84,7 @@ export default function CategoryFilter({
           ref={sliderEl}
         >
           <CategoryItem
-            categoryName={t('text-category-all')}
+            categoryName={t('text-category-most-liked')}
             isActive={defaultActivePath === router.asPath}
             onClick={() => handleClick(defaultActivePath)}
           />

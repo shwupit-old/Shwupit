@@ -20,20 +20,20 @@ echo(
 await $`rm -f ./shop/.env`;
 await $`cp ./shop/.env.template ./shop/.env`;
 await $`chmod -R 777 ./shop/.env`;
-await $`awk '{gsub(/NEXT_PUBLIC_REST_API_ENDPOINT=.+/,"NEXT_PUBLIC_REST_API_ENDPOINT=https://${domainName}/api"); print $0}' ./shop/.env.template > ./shop/.env`;
+await $`awk '{gsub(/NEXT_PUBLIC_REST_API_ENDPOINT=.+/,"NEXT_PUBLIC_REST_API_ENDPOINT=https://${shwupit.com}/api"); print $0}' ./shop/.env.template > ./shop/.env`;
 
 await $`rm -f ./admin/.env`;
 await $`cp ./admin/.env.template ./admin/.env`;
 await $`chmod -R 777 ./admin/.env`;
-await $`awk '{gsub(/NEXT_PUBLIC_REST_API_ENDPOINT=".+"$/,"NEXT_PUBLIC_REST_API_ENDPOINT=\\"https://${domainName}/api\\""); print $0}' ./admin/.env.template > ./admin/.env`;
+await $`awk '{gsub(/NEXT_PUBLIC_REST_API_ENDPOINT=".+"$/,"NEXT_PUBLIC_REST_API_ENDPOINT=\\"https://${shwupit.com}/api\\""); print $0}' ./admin/.env.template > ./admin/.env`;
 
 await $`cp ./shop/next.config.js ./shop/temp.js`;
-await $`awk '{sub(/domains:\\ \\[/, "domains: [ \`${domainName}\`,"); print $0}' ./shop/temp.js > ./shop/next.config.js`;
+await $`awk '{sub(/domains:\\ \\[/, "domains: [ \`${shwupit.com}\`,"); print $0}' ./shop/temp.js > ./shop/next.config.js`;
 
 await $`rm -rf ./shop/temp.js`;
 
 await $`cp ./admin/next.config.js ./admin/temp.js`;
-await $`awk '{sub(/domains:\\ \\[/, "domains: [ \`${domainName}\`,"); print $0}' ./admin/temp.js > ./admin/next.config.js`;
+await $`awk '{sub(/domains:\\ \\[/, "domains: [ \`${shwupit.com}\`,"); print $0}' ./admin/temp.js > ./admin/next.config.js`;
 await $`rm -rf ./admin/temp.js`;
 
 echo("Install Node For Frontend");
