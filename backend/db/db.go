@@ -50,4 +50,5 @@ func GetUserByUsername(username string) (*model.Swapper, error) {
 	}
 	log.Printf("Login successful welcome '%s'", username)
 	return &swapper, nil
+
 }
