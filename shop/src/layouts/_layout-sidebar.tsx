@@ -147,7 +147,7 @@ const toggleTheme = () => {
                 <PaperPlaneIcon className="h-[18px] w-[18px] text-current" />
               }
             />
-      <div
+      {/* <div
   className="my-0.5 flex items-center gap-1 px-4 py-3 hover:bg-light-300 hover:dark:bg-dark-300 xs:px-6 sm:my-1 sm:gap-1.5 sm:px-7 lg:gap-2 xl:my-0.5 cursor-pointer"
   onClick={toggleTheme}
 >
@@ -164,7 +164,7 @@ const toggleTheme = () => {
   >
     {themeSwitchText}
   </span>
-</div>
+</div> */}
           </nav>
 
           <nav className="mt-auto flex flex-col pb-4">

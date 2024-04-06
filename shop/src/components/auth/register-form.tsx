@@ -40,10 +40,12 @@ export default function RegisterUserForm() {
       setServerError(err.response.data);
     },
   });
+  
   const onSubmit: SubmitHandler<RegisterUserInput> = (data) => {
     mutate(data);
   };
 
+  
   return (
     <div className="bg-light px-6 pt-10 pb-8 dark:bg-dark-300 sm:px-8 lg:p-12">
       <RegisterBgPattern className="absolute bottom-0 left-0 text-light dark:text-dark-300 dark:opacity-60" />

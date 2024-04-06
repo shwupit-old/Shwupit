@@ -30,8 +30,8 @@
   width: 40px;
   height: 40px;
   margin-bottom: 12px;
-  border: 0.25rem solid rgba(0, 159, 127, 0.3);
-  border-top-color: rgba(0, 159, 127, 1);
+  border: 0.25rem solid rgba(75, 152, 198, 1);
+  border-top-color: rgba(142, 196, 228, 1);
   -webkit-animation: spin 1s infinite linear;
   animation: spin 1s infinite linear;
 }
@@ -41,8 +41,8 @@
   /* width: 24px;
   height: 24px; */
   display: flex;
-  border: 3px solid rgba(0, 159, 127, 0.3);
-  border-top-color: rgba(0, 159, 127, 1);
+  border: 3px solid rgba(75, 152, 198, 1);
+  border-top-color: rgba(142, 196, 228, 1);
   -webkit-animation: spin 1s infinite linear;
   animation: spin 1s infinite linear;
 }

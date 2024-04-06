@@ -14,7 +14,7 @@ const StatusColor = (status: string) => {
     status?.toLowerCase() === 'order-completed' ||
     status?.toLowerCase() === 'payment-success'
   ) {
-    bg_class = 'bg-[#24b47e]';
+    bg_class = 'bg-[#4b98c6]';
   } else if (
     status?.toLowerCase() === 'order-cancelled' ||
     status?.toLowerCase() === 'payment-reversal'

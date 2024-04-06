@@ -64,6 +64,16 @@ export class HttpClient {
     return response.data;
   }
 
+  static async register(userData: { username: string; email: string; password: string }) {
+    return this.post('/register', userData);
+  }
+
+  static async login(credentials: { username: string; password: string }) {
+    return this.post('/login', credentials);
+  }
+
+  
+
   static formatSearchParams(params: Partial<SearchParamOptions>) {
     return Object.entries(params)
       .filter(([, value]) => Boolean(value))
