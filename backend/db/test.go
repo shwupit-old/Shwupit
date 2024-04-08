@@ -20,5 +20,4 @@ func TestConnection() {
 	}
 
 	defer session.Close()
-
 }
