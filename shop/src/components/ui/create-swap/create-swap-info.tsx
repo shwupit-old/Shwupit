@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { ItemImageSection } from './create-swap-image';
 import popularItems from './src/data/popular-items.json';
-import ItemAttributes from './create-swap-attributes';
+import ItemCategories from './create-swap-categories';
+import ItemLocation from './create-swap-location';
 
 
 const ItemDetailsSection: React.FC = () => {
@@ -72,7 +73,7 @@ const ItemDetailsSection: React.FC = () => {
             placeholder={popularItems[currentIndex].description}
           ></textarea>
           <div className="flex justify-between">
-            <span className={`text-xs font-regular ${hintTextColor}`}>Condition, size, and intentions to attract the right swap</span>
+            <span className={`text-xs mt-1 font-regular ${hintTextColor}`}>Condition, size, and intentions to attract the right swap</span>
             <span className={`text-xs font-regular ${charCount >= charLimit ? 'text-red-500' : hintTextColor}`}>{charCount}/{charLimit}</span>
           </div>
         </div>
@@ -86,13 +87,18 @@ const ItemDetailsSection: React.FC = () => {
           <span className={`block mt-0 text-xs font-regular ${hintTextColor}`}>Add up to 6 photos in JPEG or PNG format</span>
 
           <div className="mt-6">
-            <ItemAttributes
-              borderColor="border-2 border-gray-200" 
-              borderRadius="rounded-lg" 
-              textColor="text-black" 
-              borderThickness="border-1" 
-              inputBackground= {inputBackground}
+            <ItemCategories
+              borderColor="border-2 border-gray-200"
+              borderRadius="rounded-lg"
+              textColor="text-black"
+              borderThickness="border-1"
+              inputBackground={inputBackground}
+              hintTextColor={hintTextColor}
             />
+
+          </div>
+          <div className="mt-6">
+            <ItemLocation />
           </div>
         </div>
 

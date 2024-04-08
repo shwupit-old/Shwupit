@@ -12,6 +12,7 @@ import Button from '@/components/ui/button';
 import { RegisterBgPattern } from '@/components/auth/register-bg-pattern';
 import { useState } from 'react';
 import useAuth from './use-auth';
+
 import { useTranslation } from 'next-i18next';
 
 const registerUserValidationSchema = yup.object().shape({

@@ -1,0 +1,5 @@
+{
+    "USA": ["New York", "Los Angeles", "Chicago"],
+    "Canada": ["Toronto", "Vancouver", "Montreal"],
+    "UK": ["London", "Manchester", "Liverpool"]
+  }
