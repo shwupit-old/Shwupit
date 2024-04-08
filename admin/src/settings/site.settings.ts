@@ -12,7 +12,7 @@ export const siteSettings = {
   name: 'Shwup',
   description: '',
   logo: {
-    url: '/logo.svg',
+    // url: '/logo.svg',
     alt: 'Shwup',
     href: '/',
     width: 138,

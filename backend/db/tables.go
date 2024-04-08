@@ -2,25 +2,25 @@ package db
 
 import (
 	"fmt"
-	"github.com/gocql/gocql"
 	"log"
+
+	"github.com/gocql/gocql"
 )
 
 func initSession() (*gocql.Session, error) {
-	cluster := gocql.NewCluster("127.0.0.1:9042") 
+	cluster := gocql.NewCluster("127.0.0.1:9042")
 	cluster.Keyspace = "swap_platform"
 	cluster.Consistency = gocql.All
 	session, err := cluster.CreateSession()
 	if err != nil {
-		log.Printf("Could not connect to Cassandra: %v", err) 
-		return nil, err 
+		log.Printf("Could not connect to Cassandra: %v", err)
+		return nil, err
 	}
 	return session, nil
 }
 
-
 func CreateKeyspace(session *gocql.Session) {
-	
+
 	cql := `CREATE KEYSPACE IF NOT EXISTS swap_platform
 		WITH REPLICATION = {
 			'class' : 'SimpleStrategy',
@@ -105,15 +105,14 @@ func CreateImagesTable(session *gocql.Session) {
 }
 
 func StartDatabase() {
-    var err error
-    session, err := initSession()
-    if err != nil {
-        log.Fatalf("Could not connect to Cassandra: %v", err)
-    }
+	var err error
+	session, err := initSession()
+	if err != nil {
+		log.Fatalf("Could not connect to Cassandra: %v", err)
+	}
 
-    CreateKeyspace(session)
-    CreateSwappersTable(session)
-    CreateTableProducts(session)
+	CreateKeyspace(session)
+	CreateSwappersTable(session)
+	CreateTableProducts(session)
 	CreateTableImages(session)
 }
-

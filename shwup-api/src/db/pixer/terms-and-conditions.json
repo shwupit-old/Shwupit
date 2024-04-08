@@ -57,7 +57,7 @@
       "id": 5,
       "title": "Swap Process and Fees",
       "slug": "swap-process-and-fees",
-      "description": "Upon agreeing to a swap, both parties are required to deposit an amount equivalent to the value of the items involved. A non-refundable service fee of 4% is applied to each successful swap.",
+      "description": "Upon agreeing to a swap, both parties are required to deposit an amount equivalent to the value of the items involved. A non-refundable service fee of 5% is applied to each successful swap.",
       "type": "global",
       "issued_by": "Super Admin",
       "is_approved": 1,
