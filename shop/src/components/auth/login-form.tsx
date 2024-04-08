@@ -17,7 +17,7 @@ import * as yup from 'yup';
 
 const loginValidationSchema = yup.object().shape({
   email: yup.string().email().required(),
-  password: yup.string().required(),
+  // password: yup.string().required(), for testing propose
 });
 
 export default function LoginUserForm() {
