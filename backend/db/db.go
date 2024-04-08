@@ -24,7 +24,7 @@ func InsertSwapper(swapper model.Swapper) error {
 	err := session.Query(`INSERT INTO swappers (user_id, username, email, location, swapping_history, availability, profile_picture, account_creation_date) VALUES (?, ?, ?, ?, ?, ?, ?, ? )`,
 		swapper.UserID, swapper.Username, swapper.Email, swapper.Location, swapper.SwappingHistory, swapper.Availability, swapper.ProfilePicture, swapper.AccountCreationDate).Exec()
 	if err != nil {
-		log.Printf("Failed to insert swapper: %+v, error: %v\n", swapper, err) // Log the error
+		log.Printf("Failed to insert swapper: %+v, error: %v\n", swapper, err) 
 	}
 	return err
 }
@@ -43,7 +43,6 @@ func GetUserByUsername(username string) (*model.Swapper, error) {
 		&swapper.ProfilePicture,
 		&swapper.AccountCreationDate,
 	)
-	
     
     if err != nil {
         log.Printf("Failed to retrieve swapper by username '%s': %v", username, err)
