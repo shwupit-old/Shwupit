@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import UpIcon from '@/components/icons/up-icon';
+import DownIcon from '@/components/icons/down-icon';
 
 interface DropdownProps {
   label: string;
@@ -9,6 +11,7 @@ interface DropdownProps {
   itemClassName?: string;
   labelClassName?: string;
   dropdownClassName?: string;
+  includeOther?: boolean;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -20,50 +23,64 @@ const Dropdown: React.FC<DropdownProps> = ({
   itemClassName = '',
   labelClassName = '',
   dropdownClassName = '',
+  includeOther = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredItems, setFilteredItems] = useState<string[]>([]);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-
   useEffect(() => {
-    const filtered = items.filter(item => item.toLowerCase().includes(searchTerm.toLowerCase()));
+    let filtered = items.filter((item) => 
+      item.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  
+    if (includeOther && !filtered.includes("Other")) {
+      filtered = [...filtered, "Other"];
+    }
+  
     setFilteredItems(filtered);
-
+  
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+  
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, searchTerm, items]);
 
   const handleItemClick = (item: string) => {
-    setSearchTerm(item); // Consider resetting the searchTerm if you want the input to reflect the selected item
+    setSearchTerm(item);
     setIsOpen(false);
     onItemSelect?.(item);
   };
 
-
+  const toggleDropdown = () => setIsOpen(!isOpen);
 
   return (
     <div className={`relative ${className}`} ref={wrapperRef}>
       <label className={`${labelClassName}`}>{label}</label>
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        onFocus={() => setIsOpen(true)}
-        className={`${inputClassName}`}
-      />
+      <div className="flex justify-between items-center">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onFocus={() => setIsOpen(true)}
+          className={`${inputClassName}`}
+        />
+        <button onClick={toggleDropdown} className="flex items-center p-2">
+          {isOpen ? <UpIcon /> : <DownIcon />}
+        </button>
+      </div>
       {isOpen && (
-        <div className={`absolute z-10 mt-1 w-full overflow-auto shadow-md max-h-60 ${dropdownClassName}`}>
-          {filteredItems.map((item, index) => (
+        <div
+          className={`absolute z-10 mt-1 w-full overflow-auto shadow-md max-h-60 ${dropdownClassName}`}
+        >
+          {filteredItems.map((item) => (
             <div
-              key={index}
+              key={item}
               onClick={() => handleItemClick(item)}
               className={`${itemClassName}`}
             >

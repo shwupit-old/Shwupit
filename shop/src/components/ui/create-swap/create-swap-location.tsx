@@ -22,10 +22,10 @@ interface CountryCityData {
 
       const dropdownStylingProps = {
         className: "w-full",
-        inputClassName: "w-full py-2 px-3 text-sm bg-white focus:ring-0 border border-gray-200 rounded-lg",
+        inputClassName: "w-full py-2 px-3 text-sm bg-white focus:ring-0 border border-gray-200 rounded-base",
         itemClassName: "px-3 py-2 hover:bg-gray-300 hover:text-white cursor-pointer",
         labelClassName: "block text-base font-semibold text-black",
-        dropdownClassName: "bg-white shadow-md max-h-60 rounded-lg",
+        dropdownClassName: "bg-white shadow-md max-h-60 rounded-base",
       };
   
       return (
@@ -36,7 +36,7 @@ interface CountryCityData {
             onItemSelect={setSelectedCountry}
             {...dropdownStylingProps}
           />
-          <span className="text-xs text-gray-600">Select the country from where you're shipping. This helps swappers estimate shipping times.</span>
+          <span className="text-xs text-gray-600">Select the country from where you're shipping.</span>
   
           <Dropdown
             label="City"

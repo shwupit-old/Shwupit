@@ -10,7 +10,7 @@ export const ItemImageSection: React.FC = () => {
 
     const isDark = theme === 'dark' || !theme;
     const borderColor = isDark ? 'border-gray-600' : 'border-gray-200';
-    const borderRadius = 'rounded-lg';
+    const borderRadius = 'rounded-base';
     const placeholderColor = isDark ? 'bg-gray-700' : 'bg-gray-200';
     const textColor = isDark ? 'text-white' : 'text-gray-900';
 
@@ -51,7 +51,7 @@ export const ItemImageSection: React.FC = () => {
                         {hoverIndex === index && (
                             <button
                                 onClick={() => handleDeleteImage(index)}
-                                className="absolute rounded-lg inset-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300"
+                                className="absolute rounded-base inset-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300"
                                 aria-label="Delete image"
                             >
                                 <DeleteIcon className="text-white w-5 h-5" />

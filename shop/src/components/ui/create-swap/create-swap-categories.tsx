@@ -25,23 +25,33 @@ const ItemCategories: React.FC<ItemCategoriesProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [filteredSubcategory, setFilteredSubcategory] = useState<string[]>([]);
+  const [subCategoryInput, setSubCategoryInput] = useState(''); // New state to handle subcategory input
 
   useEffect(() => {
-    if (selectedCategory) {
-      // Dynamically set subcategories based on the selected category
-      const categoriesSubcategories = subcategoryData[selectedCategory] || [];
-      setFilteredSubcategory(categoriesSubcategories);
-    } else {
-      // Reset subcategories if no category is selected
-      setFilteredSubcategory([]);
-    }
-  }, [selectedCategory]);
+    let updatedSubcategories =
+      selectedCategory && subcategoryData[selectedCategory]
+        ? subcategoryData[selectedCategory].filter((sc) =>
+            sc.toLowerCase().includes(subCategoryInput.toLowerCase()),
+          )
+        : [];
+
+    updatedSubcategories = updatedSubcategories.filter((sc) => sc !== 'Other');
+    updatedSubcategories.push('Other');
+
+    console.log('Updated Subcategories:', updatedSubcategories);
+
+    setFilteredSubcategory(updatedSubcategories);
+  }, [selectedCategory, subCategoryInput]);
+
+  const handleInputChange = (input: string) => {
+    setSubCategoryInput(input);
+  };
 
   const dropdownCommonProps = {
-    borderColor: borderColor,
-    borderRadius: borderRadius,
-    textColor: textColor,
-    hintTextColor: hintTextColor,
+    borderColor,
+    borderRadius,
+    textColor,
+    hintTextColor,
     className: 'flex-1',
     labelClassName: `block mb-1 text-base font-semibold ${textColor}`,
     inputClassName: `w-full py-2 px-3 text-sm ${textColor} ${inputBackground} ${borderRadius} focus:ring-0 ${borderColor} ${borderThickness}`,
@@ -58,16 +68,21 @@ const ItemCategories: React.FC<ItemCategoriesProps> = ({
           onItemSelect={setSelectedCategory}
           {...dropdownCommonProps}
         />
-        <span className={`block mt-1 text-xs ${hintTextColor}`}>Select a category for better search visibility</span>
+        <span className={`block mt-1 text-xs ${hintTextColor}`}>
+          Select a category
+        </span>
       </div>
       <div className="flex-1">
         <Dropdown
           label="Subcategory"
           items={filteredSubcategory}
-          onItemSelect={(selectedSubcategory) => console.log('Subcategory Selected:', selectedSubcategory)}
+          onItemSelect={(item) => console.log('Subcategory Selected:', item)}
+          includeOther={true} 
           {...dropdownCommonProps}
         />
-        <span className={`block mt-1 text-xs ${hintTextColor}`}>Select a subcategory for more specific classification</span>
+        <span className={`block mt-1 text-xs ${hintTextColor}`}>
+          Select a subcategory
+        </span>
       </div>
     </div>
   );
