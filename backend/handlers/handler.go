@@ -4,8 +4,12 @@ import (
 	"api/db"
 	"api/model"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 func RegisterHandlers() {
@@ -13,8 +17,6 @@ func RegisterHandlers() {
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/upload", uploadHandler)
 }
-
-
 
 func swappersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -38,7 +40,6 @@ func swappersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-
 	var request struct {
 		Username string `json:"username"`
 	}
@@ -46,7 +47,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-
 	swapper, err := db.GetUserByUsername(request.Username)
 	if err != nil {
 		http.Error(w, "Failed to retrieve swapper", http.StatusInternalServerError)
@@ -94,6 +94,12 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	name := handler.Filename
 	fmt.Fprintf(w, "File uploaded: %v", name)
 
-	hash := db.GenerateHash(header.Filename)
+	hash := db.GenerateHash(handler.Filename)
+	err = db.AddHashImage(hash, name, newFilePath)
+	if err != nil {
+		http.Error(w, "Failed to add image to database", http.StatusInternalServerError)
+		fmt.Printf("Failed to add image to database: %v\n", err)
+		return
+	}
 
 }

@@ -91,17 +91,17 @@ func CreateImagesTable(session *gocql.Session) {
 	fmt.Println("Table created successfully")
 }
 
-func CreateImagesTable(session *gocql.Session) {
-	cql := `CREATE TABLE IF NOT EXISTS images (
-		hash TEXT PRIMARY KEY,
-		name TEXT,
-		imageDescription TEXT,
-		imagePath TEXT,
-		created TIMESTAMP,
-		updated TIMESTAMP,
-		deleted TIMESTAMP
-	);
-	`
+func checkIfKeyspaceExists(session *gocql.Session) bool {
+	var name, durableWrites, strategyClass string
+	var strategyOptions map[string]interface{}
+
+	query := `SELECT keyspace_name, durable_writes, strategy_class, strategy_options FROM system_schema.keyspaces WHERE keyspace_name = ?`
+	if err := session.Query(query, "swap_platform").Scan(&name, &durableWrites, &strategyClass, &strategyOptions); err != nil {
+		log.Printf("Failed to retrieve keyspace: %v", err)
+		return false
+	}
+	fmt.Printf("Keyspace: %s, DurableWrites: %s, StrategyClass: %s, StrategyOptions: %v\n", name, durableWrites, strategyClass, strategyOptions)
+	return true
 }
 
 func StartDatabase() {
@@ -114,5 +114,5 @@ func StartDatabase() {
 	CreateKeyspace(session)
 	CreateSwappersTable(session)
 	CreateTableProducts(session)
-	CreateTableImages(session)
+	CreateImagesTable(session)
 }
