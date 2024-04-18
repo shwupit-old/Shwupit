@@ -1,8 +1,8 @@
 package model
 
 import (
-	"time"
 	"github.com/gocql/gocql"
+	"time"
 )
 
 type Swapper struct {

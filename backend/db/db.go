@@ -2,10 +2,9 @@ package db
 
 import (
 	"api/model"
+	"github.com/gocql/gocql"
 	"log"
 	"time"
-
-	"github.com/gocql/gocql"
 )
 
 var session *gocql.Session
@@ -65,12 +64,11 @@ func GetUserByUsername(username string) (*model.Swapper, error) {
 }
 
 func AddHashImage(hash string, name string, filePath string) error {
-    err := session.Query(`INSERT INTO images (hash, name, imagePath, created) VALUES (?, ?, ?, ?)`, 
-        hash, name, filePath, time.Now()).Exec()
-    if err != nil {
-        log.Printf("Failed to insert image: %v", err)
-        return err
-    }
-    return nil
+	err := session.Query(`INSERT INTO images (hash, name, imagePath, created) VALUES (?, ?, ?, ?)`,
+		hash, name, filePath, time.Now()).Exec()
+	if err != nil {
+		log.Printf("Failed to insert image: %v", err)
+		return err
+	}
+	return nil
 }
-

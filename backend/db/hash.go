@@ -17,7 +17,7 @@ func GenerateHash(filename string) string {
 	fileBeforeHash := filename[:len(filename)-len(fileType)-1]
 	fileAfterHash := convertToHash(fileBeforeHash, countBeforeType)
 
-	currentDateTime := time.Now().Format("20060102150405") 
+	currentDateTime := time.Now().Format("20060102150405")
 	completeHash := fmt.Sprintf("%s%s%s%d%s", fileTypeNumRep, fileTypeRep, fileAfterHash, countBeforeType, currentDateTime)
 	return completeHash
 }
@@ -67,7 +67,7 @@ func convertToHash(fileToHash string, count int) string {
 	threeQuarters := int(math.Floor(float64(count) * 3 / 4))
 	middle := int(math.Floor(float64(count) / 2))
 
-	if len(fileToHash) > 1 { 
+	if len(fileToHash) > 1 {
 		oneQuarterStr := string(fileToHash[oneQuarter])
 		threeQuartersStr := string(fileToHash[threeQuarters])
 		middleStr := string(fileToHash[middle])

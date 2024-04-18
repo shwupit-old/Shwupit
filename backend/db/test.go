@@ -4,6 +4,7 @@ import (
 	"github.com/gocql/gocql"
 	"log"
 )
+
 func TestConnection() {
 	cluster := gocql.NewCluster("127.0.0.1:9042")
 	cluster.Keyspace = "user_data"

@@ -2,9 +2,8 @@ package db
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/gocql/gocql"
+	"log"
 )
 
 func initSession() (*gocql.Session, error) {
