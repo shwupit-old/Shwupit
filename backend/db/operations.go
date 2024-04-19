@@ -1,39 +1,13 @@
 package db
 
 import (
-	"api/model"
 	"github.com/gocql/gocql"
-	"log"
 	"time"
+	"log"
+	"api/models"
 )
 
-var session *gocql.Session
-
-func init() {
-	var err error
-	cluster := gocql.NewCluster("127.0.0.1:9042")
-	cluster.Consistency = gocql.All
-	session, err = cluster.CreateSession()
-	if err != nil {
-		log.Fatalf("Could not connect to Cassandra : %v", err)
-	}
-	defer session.Close()
-
-	keyspace_exsits := checkIfKeyspaceExists(session)
-	if keyspace_exsits {
-		cluster.Keyspace = "swap_platform"
-	} else {
-		CreateKeyspace(session)
-		cluster.Keyspace = "swap_platform"
-	}
-	session, err = gocql.NewSession(*cluster)
-	if err != nil {
-		log.Fatalf("Could not connect to Cassandra : %v", err)
-	}
-}
-
 func InsertSwapper(swapper model.Swapper) error {
-
 	err := session.Query(`INSERT INTO swappers (user_id, username, email, location, swapping_history, availability, profile_picture, account_creation_date) VALUES (?, ?, ?, ?, ?, ?, ?, ? )`,
 		swapper.UserID, swapper.Username, swapper.Email, swapper.Location, swapper.SwappingHistory, swapper.Availability, swapper.ProfilePicture, swapper.AccountCreationDate).Exec()
 	if err != nil {
@@ -42,7 +16,7 @@ func InsertSwapper(swapper model.Swapper) error {
 	return err
 }
 
-func GetUserByUsername(username string) (*model.Swapper, error) {
+func GetSwapperByUsername(username string) (*model.Swapper, error) {
 	var swapper model.Swapper
 	err := session.Query(`SELECT user_id, username, email, location, swapping_history, availability, profile_picture, account_creation_date FROM swappers WHERE username = ? LIMIT 1 ALLOW FILTERING`, username).Consistency(gocql.One).Scan(
 		&swapper.UserID,
