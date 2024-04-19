@@ -7,7 +7,7 @@ import (
 	"api/models"
 )
 
-func InsertSwapper(swapper model.Swapper) error {
+func InsertSwapper(swapper models.Swapper) error {
 	err := session.Query(`INSERT INTO swappers (user_id, username, email, location, swapping_history, availability, profile_picture, account_creation_date) VALUES (?, ?, ?, ?, ?, ?, ?, ? )`,
 		swapper.UserID, swapper.Username, swapper.Email, swapper.Location, swapper.SwappingHistory, swapper.Availability, swapper.ProfilePicture, swapper.AccountCreationDate).Exec()
 	if err != nil {
@@ -16,8 +16,8 @@ func InsertSwapper(swapper model.Swapper) error {
 	return err
 }
 
-func GetSwapperByUsername(username string) (*model.Swapper, error) {
-	var swapper model.Swapper
+func GetSwapperByUsername(username string) (*models.Swapper, error) {
+	var swapper models.Swapper
 	err := session.Query(`SELECT user_id, username, email, location, swapping_history, availability, profile_picture, account_creation_date FROM swappers WHERE username = ? LIMIT 1 ALLOW FILTERING`, username).Consistency(gocql.One).Scan(
 		&swapper.UserID,
 		&swapper.Username,

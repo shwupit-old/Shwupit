@@ -12,7 +12,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		log.Println("Got a request from swappers")
-		var swapper model.Swapper
+		var swapper models.Swapper
 		if err := json.NewDecoder(r.Body).Decode(&swapper); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

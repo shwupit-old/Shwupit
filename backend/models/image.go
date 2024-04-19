@@ -1,11 +1,11 @@
-package model
+package models
 
 import "github.com/gocql/gocql"
 
-type image struct {
-	hash             string
-	name             string
-	imageDescription string
+type Image struct {
+	Hash             string
+	Name             string
+	ImageDescription string
 	ImageURL         string     `json:"image_url"`
 	ProductID        gocql.UUID `json:"product_id"`
 }
