@@ -48,7 +48,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "File uploaded: %v", name)
 
 	hash := db.GenerateHash(handler.Filename)
-	err = db.AddHashImage(hash, name, newFilePath)
+	err = db.InsertHashImage(hash, name, newFilePath)
 	if err != nil {
 		http.Error(w, "Failed to add image to database", http.StatusInternalServerError)
 		fmt.Printf("Failed to add image to database: %v\n", err)

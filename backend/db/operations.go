@@ -37,7 +37,7 @@ func GetSwapperByUsername(username string) (*models.Swapper, error) {
 	return &swapper, nil
 }
 
-func AddHashImage(hash string, name string, filePath string) error {
+func InsertHashImage(hash string, name string, filePath string) error {
 	err := session.Query(`INSERT INTO images (hash, name, imagePath, created) VALUES (?, ?, ?, ?)`,
 		hash, name, filePath, time.Now()).Exec()
 	if err != nil {

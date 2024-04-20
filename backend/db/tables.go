@@ -90,6 +90,28 @@ func CreateImagesTable(session *gocql.Session) {
 	fmt.Println("Table created successfully")
 }
 
+func CreateRefundsTable(session *gocql.Session) {
+	cql := `CREATE TABLE IF NOT EXISTS refunds (
+		refund_id UUID PRIMARY KEY,
+		order_id UUID,
+		product_id TEXT,
+		user_id TEXT,
+		reason_for_refund TEXT,
+		refund_amount DOUBLE,
+		refund_date TIMESTAMP,
+		refund_reason TEXT,
+		refund_status TEXT,
+		created_at TIMESTAMP,
+		updated_at TIMESTAMP
+	);
+	`
+
+	if err := session.Query(cql).Exec(); err != nil {
+		log.Fatalf("Failed to create table: %v", err)
+	}
+	fmt.Println("Table created successfully")
+}
+
 func checkIfKeyspaceExists(session *gocql.Session) bool {
 	var name, durableWrites, strategyClass string
 	var strategyOptions map[string]interface{}
