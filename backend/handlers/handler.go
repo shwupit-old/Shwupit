@@ -1,18 +1,14 @@
 package handlers
 
-import
-(
-	"net/http"
+import (
+    "net/http"
 )
 
-
-func RegisterHandlers() {
-	http.HandleFunc("/swappers/register", RegisterHandler)
-	http.HandleFunc("/swappers/login", loginHandler)
-	http.HandleFunc("/image/upload", uploadHandler)
+func RegisterHandlers(mux *http.ServeMux) {
+    mux.HandleFunc("/swappers/register", RegisterHandler)
+    mux.HandleFunc("/swappers/login", loginHandler)
+    mux.HandleFunc("/image/upload", uploadHandler)
 }
-
-
 
 
 

@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import type { SubmitHandler } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import type { RegisterUserInput } from '@/types';
 import { useMutation } from 'react-query';
 import toast from 'react-hot-toast';
@@ -13,19 +13,42 @@ import { RegisterBgPattern } from '@/components/auth/register-bg-pattern';
 import { useState } from 'react';
 import useAuth from './use-auth';
 import { useTranslation } from 'next-i18next';
+import axios from 'axios';
+import { yupResolver } from '@hookform/resolvers/yup';
+
 
 const registerUserValidationSchema = yup.object().shape({
   name: yup.string().max(20).required(),
   email: yup.string().email().required(),
-  password: yup.string().min(6).required(),
+  // password: yup.string().min(6).required(),
 });
+
+const registerSwapper = async (data: RegisterUserInput) => {
+  const res = await axios.post('http://localhost:8080/swappers/register', data, {
+      headers: {
+          'Content-Type': 'application/json'
+      }
+  });
+  return res.data;
+}
+
+
 
 export default function RegisterUserForm() {
   const { t } = useTranslation('common');
   const { openModal, closeModal } = useModalAction();
   const { authorize } = useAuth();
   let [serverError, setServerError] = useState<RegisterUserInput | null>(null);
-  const { mutate } = useMutation(client.users.register, {
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(registerUserValidationSchema),
+  });
+
+  const { mutate } = useMutation(registerSwapper, {
     onSuccess: (res) => {
       if (!res.token) {
         toast.error(<b>{t('text-profile-page-error-toast')}</b>, {
@@ -37,11 +60,12 @@ export default function RegisterUserForm() {
       closeModal();
     },
     onError: (err: any) => {
-      setServerError(err.response.data);
+      setServerError(err.response?.data || "Unknown Error Occurred");
+      toast.error("Registration Failed");
     },
   });
   
-  const onSubmit: SubmitHandler<RegisterUserInput> = (data) => {
+  const onSubmit:any = (data:any) => {
     mutate(data);
   };
 
