@@ -31,10 +31,10 @@ const Dropdown: React.FC<DropdownProps> = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let filtered = items.filter((item) => 
-      item.toLowerCase().includes(searchTerm.toLowerCase())
+    let filtered = items.filter((item) =>
+      typeof item === 'string' && item.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  
+
     if (includeOther && !filtered.includes("Other")) {
       filtered = [...filtered, "Other"];
     }
@@ -52,7 +52,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, [isOpen, searchTerm, items]);
 
   const handleItemClick = (item: string) => {
-    setSearchTerm(item);
+    setSearchTerm(item); // Consider resetting the searchTerm if you want the input to reflect the selected item
     setIsOpen(false);
     onItemSelect?.(item);
   };
@@ -62,15 +62,18 @@ const Dropdown: React.FC<DropdownProps> = ({
   return (
     <div className={`relative ${className}`} ref={wrapperRef}>
       <label className={`${labelClassName}`}>{label}</label>
-      <div className="flex justify-between items-center">
+      <div className="flex items-center relative">
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => setIsOpen(true)}
-          className={`${inputClassName}`}
+          className={`w-full ${inputClassName}`}
         />
-        <button onClick={toggleDropdown} className="flex items-center p-2">
+        <button 
+          onClick={toggleDropdown} 
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+        >
           {isOpen ? <UpIcon /> : <DownIcon />}
         </button>
       </div>
@@ -82,7 +85,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             <div
               key={item}
               onClick={() => handleItemClick(item)}
-              className={`${itemClassName}`}
+              className={`${itemClassName} cursor-pointer`}
             >
               {item}
             </div>
