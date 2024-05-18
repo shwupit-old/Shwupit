@@ -1,5 +1,5 @@
 const routes = {
-  home: '/explore',
+  home: '/',
   authors: '/authors',
   explore: '/explore',
   popularProducts: '/popular-products',
@@ -7,6 +7,7 @@ const routes = {
   contact: '/contact-us',
   purchases: '/purchases',
   createItem: '/swaps/create-item',
+  mySwaps: '/swaps/',
   messages: '/messages',
   wishlists: '/wishlists',
   reports: '/reports',

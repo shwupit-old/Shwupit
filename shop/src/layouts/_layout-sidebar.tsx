@@ -114,19 +114,12 @@ return (
       <Scrollbar className="relative h-full w-full">
         <div className="flex h-full w-full flex-col">
           <nav className="flex flex-col">
-            {/* <NavLink
+            <NavLink
               title={t('text-home')}
               href={routes.home}
               isCollapse={isCollapse}
               icon={<HomeIcon className="h-[18px] w-[18px] text-current" />}
-            /> */}
-            <NavLink
-              title={t('text-explore')}
-              href={routes.explore}
-              isCollapse={isCollapse}
-              icon={<DiscoverIcon className="h-[18px] w-[18px] text-current" />}
-            />
-
+            /> 
             
 
             {/* <NavLink
@@ -137,8 +130,8 @@ return (
             /> */}
 
             <NavLink
-              title={t('text-swaps')}
-              href={routes.feed}
+              title={t('text-my-swaps')}
+              href={routes.mySwaps}
               isCollapse={isCollapse}
               icon={<SwapIcon className="h-[17px] w-[17px] text-current" />}
             />

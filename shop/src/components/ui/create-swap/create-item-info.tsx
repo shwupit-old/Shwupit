@@ -123,7 +123,7 @@ const ItemDetailsSection: React.FC = () => {
           <div className="mt-6">
             <ItemLocation setCurrency={setCurrency}/>
           </div>
-          <div className="mt-6">
+          <div className="mt-6 mb-11">
           <label
             htmlFor="itemPrice"
             className={`block mb-1 text-black text-base font-semibold`}
@@ -131,7 +131,7 @@ const ItemDetailsSection: React.FC = () => {
             Price
           </label>
             <ItemPrice currency={currency} />
-            <span className={`block mt-0 mb-6 text-xs font-regular ${hintTextColor}`}>
+            <span className={`block mt-0 text-xs font-regular ${hintTextColor}`}>
             Expected Swap Value
           </span>         </div>
         </div>

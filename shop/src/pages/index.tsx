@@ -6,6 +6,8 @@ import type {
 } from '@/types';
 import type { GetStaticProps } from 'next';
 import Layout from '@/layouts/_layout';
+import { isEmpty } from 'lodash';
+import { useTypes } from '@/data/type';
 import { useProducts } from '@/data/product';
 import Grid from '@/components/product/grid';
 import { useRouter } from 'next/router';
@@ -16,6 +18,7 @@ import { dehydrate, QueryClient } from 'react-query';
 import { API_ENDPOINTS } from '@/data/client/endpoints';
 import CategoryFilter from '@/components/product/category-filter';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import PromoCarousel from '@/components/product/promo-carousel';
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => {
   const queryClient = new QueryClient();
@@ -51,7 +54,10 @@ export const getStaticProps: GetStaticProps = async ({ locale }) => {
     };
   }
 };
-
+function PromotionalSlider() {
+  const { types } = useTypes({ limit: 100 });
+  return !isEmpty(types) ? <PromoCarousel types={types} /> : null;
+}
 function Products() {
   const { query } = useRouter();
   const { products, loadMore, hasNextPage, isLoadingMore, isLoading } =
@@ -81,6 +87,7 @@ const Home: NextPageWithLayout = () => {
         description="Welcome to ShwupIt – your premier destination for effortless online swapping! Dive into a world where trading items is as easy as a click. From fashion to tech, find and exchange goods that match your lifestyle. Join the ShwupIt community and make your swaps count!"
         url={routes.home}
       />
+      <PromotionalSlider />
       <CategoryFilter />
       <Products />
     </>
