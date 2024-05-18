@@ -97,19 +97,20 @@ export function Sidebar({
 const toggleTheme = () => {
   setTheme(isDarkMode ? 'light' : 'dark');
 };
-  return (
-    <aside
-      className={twMerge(
-        cn(
-          'h-full flex-col justify-between overflow-y-auto border-r border-light-400 bg-light-100 pt-[82px] text-dark-900 dark:border-0 dark:bg-dark-200',
-          isCollapse ? 'sm:w-60 xl:w-[75px]' : 'sm:w-[75px] xl:w-60',
-          width >= RESPONSIVE_WIDTH && underMaintenanceIsComing && !isScrolling
-            ? 'pt-[9.625rem]'
-            : '',
-          className
-        )
-      )}
-    >
+return (
+  <aside
+    className={twMerge(
+      cn(
+        'h-full flex-col justify-between overflow-y-auto border-r border-light-400 bg-light-100 text-dark-900 dark:border-0 dark:bg-dark-200',
+        'pt-4',
+        isCollapse ? 'sm:w-60 xl:w-[75px]' : 'sm:w-[75px] xl:w-60',
+        width >= RESPONSIVE_WIDTH && underMaintenanceIsComing && !isScrolling
+          ? 'md:pt-[9.625rem]'  
+          : 'md:pt-20', 
+        className
+      )
+    )}
+  >
       <Scrollbar className="relative h-full w-full">
         <div className="flex h-full w-full flex-col">
           <nav className="flex flex-col">
@@ -126,6 +127,8 @@ const toggleTheme = () => {
               icon={<DiscoverIcon className="h-[18px] w-[18px] text-current" />}
             />
 
+            
+
             {/* <NavLink
               title={t('text-top-authors')}
               href={routes.authors}
@@ -141,11 +144,19 @@ const toggleTheme = () => {
             />
 
             <NavLink
-              title={t('text-contact')}
-              href={routes.contact}
+              title={t('text-messages')}
+              href={routes.messages}
               isCollapse={isCollapse}
               icon={
                 <PaperPlaneIcon className="h-[18px] w-[18px] text-current" />
+              }
+            />
+             <NavLink
+              title={t('text-disputes')}
+              href={routes.contact}
+              isCollapse={isCollapse}
+              icon={
+                <ExclamationCircleIcon className="h-[18px] w-[18px] text-current" />
               }
             />
       {/* <div
@@ -182,6 +193,7 @@ const toggleTheme = () => {
               isCollapse={isCollapse}
               icon={<HelpIcon className="h-[18px] w-[18px] text-current" />}
             />
+            
           </nav>
         </div>
       </Scrollbar>

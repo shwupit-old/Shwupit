@@ -145,7 +145,7 @@ const MyWishlistPage: NextPageWithLayout = () => {
       className="flex min-h-full flex-grow flex-col"
     >
       <h1 className="mb-3 text-15px font-medium text-dark dark:text-light">
-        {t('text-wishlist-title')}
+        {t('text-saved')}
         <span className="ml-1 text-light-900">({wishlists.length})</span>
       </h1>
 

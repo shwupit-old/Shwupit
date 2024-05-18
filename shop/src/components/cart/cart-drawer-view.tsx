@@ -31,7 +31,7 @@ export default function CartDrawerView() {
     <>
       <div className="flex h-[70px] items-center justify-between py-2 px-5 sm:px-7">
         <h2 className="text-sm font-medium capitalize text-dark dark:text-light">
-          {t('text-wishlist-title')}
+          {t('text-saved')}
         </h2>
         <div className="ml-3 flex h-7 items-center">
           <button

@@ -21,6 +21,7 @@ import '@/assets/css/scrollbar.css';
 import '@/assets/css/swiper-carousel.css';
 import '@/assets/css/pagination.css';
 import '@/assets/css/globals.css';
+import '../../src/components/messaging/styles/chat.css'
 
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';

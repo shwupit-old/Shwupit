@@ -99,7 +99,7 @@ export default function Header({
               if (!isAuthorized) {
                 openModal('LOGIN_VIEW');
               } else {
-                router.push(routes.createSwap); //router.push to navigate
+                router.push(routes.createItem); //router.push to navigate
               }
             }}
             className="focus:ring-accent-700 hidden h-9 shrink-0 items-center justify-center border-transparent bg-brand px-3 py-0 text-sm font-semibold leading-none text-light outline-none transition duration-300 ease-in-out hover:bg-brand-dark focus:shadow focus:outline-none focus:ring-1 sm:inline-flex"

@@ -5,11 +5,11 @@
   justify-content: center;
 }
 
-.notificationIconWrapper::after {
+.notificationIconWrapperWithDot::after {
   content: '';
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 3px;
+  right: 4px;
   width: 6px;
   height: 6px;
   background-color: #4b98c6;
