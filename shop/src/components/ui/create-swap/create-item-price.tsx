@@ -37,7 +37,7 @@ const ItemPrice: React.FC<{ currency?: string }> = ({ currency = 'USD' }) => {
 
   return (
     <div className="flex items-center w-full relative">
-      <span className="absolute left-0 pl-4 flex items-center pointer-events-none text-gray-700 border-2 border-transparent"
+      <span className="absolute left-0 pl-4 mt-1 flex items-center pointer-events-none text-gray-700 border-2 border-transparent"
         style={{ height: '100%', display: 'flex', alignItems: 'center' }}
       >
         {currencySymbol}
