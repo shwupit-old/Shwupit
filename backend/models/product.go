@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/gocql/gocql"
 	"time"
+
+	"github.com/gocql/gocql"
 )
 
 type Product struct {
@@ -11,7 +12,7 @@ type Product struct {
 	ProductType        string     `json:"product_type"`
 	ProductDescription string     `json:"product_description"`
 	ProductPrice       float64    `json:"product_price"`
-	ProductImage       string     `json:"product_image"`
+	ProductImage       []string   `json:"product_image"`
 	ProductTags        []string   `json:"product_tags"`
 	ProductStartDate   time.Time  `json:"product_start_date"`
 	ProductEndDate     time.Time  `json:"product_end_date"`

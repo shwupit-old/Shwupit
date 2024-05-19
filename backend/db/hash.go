@@ -9,9 +9,17 @@ import (
 
 var supportedFileTypes = []string{"jpg", "png"}
 
-func GenerateHash(filename string) string {
+func GenerateHash(filename string) (string, error) {
+	if filename == "" {
+		return "", fmt.Errorf("filename cannot be empty")
+	}
+
 	fileType := getFileType(filename)
-	fileTypeRep := convertToASCII([]string{fileType})[0]
+	if !isSupportedFileType(fileType) {
+		return "", fmt.Errorf("unsupported file type: %s", fileType)
+	}
+
+	fileTypeRep := convertToASCII(fileType)
 	fileTypeNumRep := convertToNumberRep(fileType)
 	countBeforeType := countInFile(filename)
 	fileBeforeHash := filename[:len(filename)-len(fileType)-1]
@@ -19,19 +27,15 @@ func GenerateHash(filename string) string {
 
 	currentDateTime := time.Now().Format("20060102150405")
 	completeHash := fmt.Sprintf("%s%s%s%d%s", fileTypeNumRep, fileTypeRep, fileAfterHash, countBeforeType, currentDateTime)
-	return completeHash
+	return completeHash, nil
 }
 
-func convertToASCII(fileTypes []string) []string {
-	var convertedList []string
-	for _, fileType := range fileTypes {
-		var temp strings.Builder
-		for _, char := range fileType {
-			temp.WriteString(fmt.Sprintf("%d", int(char)))
-		}
-		convertedList = append(convertedList, temp.String())
+func convertToASCII(fileType string) string {
+	var temp strings.Builder
+	for _, char := range fileType {
+		temp.WriteString(fmt.Sprintf("%d", int(char)))
 	}
-	return convertedList
+	return temp.String()
 }
 
 func convertToNumberRep(fileType string) string {
@@ -50,6 +54,15 @@ func getFileType(filename string) string {
 	return ""
 }
 
+func isSupportedFileType(fileType string) bool {
+	for _, supportedType := range supportedFileTypes {
+		if supportedType == fileType {
+			return true
+		}
+	}
+	return false
+}
+
 func countInFile(filename string) int {
 	count := 0
 	for _, char := range filename {
@@ -62,6 +75,9 @@ func countInFile(filename string) int {
 }
 
 func convertToHash(fileToHash string, count int) string {
+	if count <= 0 || len(fileToHash) == 0 {
+		return ""
+	}
 	temp := ""
 	oneQuarter := int(math.Floor(float64(count) / 4))
 	threeQuarters := int(math.Floor(float64(count) * 3 / 4))

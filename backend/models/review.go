@@ -1,7 +1,5 @@
 package models
 
-
-
 type Review struct {
 	ReviewID   string `json:"review_id"`
 	ProductID  string `json:"product_id"`

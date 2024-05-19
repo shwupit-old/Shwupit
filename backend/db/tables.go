@@ -2,8 +2,9 @@ package db
 
 import (
 	"fmt"
-	"github.com/gocql/gocql"
 	"log"
+
+	"github.com/gocql/gocql"
 )
 
 func initSession() (*gocql.Session, error) {
@@ -110,19 +111,6 @@ func CreateRefundsTable(session *gocql.Session) {
 		log.Fatalf("Failed to create table: %v", err)
 	}
 	fmt.Println("Table created successfully")
-}
-
-func checkIfKeyspaceExists(session *gocql.Session) bool {
-	var name, durableWrites, strategyClass string
-	var strategyOptions map[string]interface{}
-
-	query := `SELECT keyspace_name, durable_writes, strategy_class, strategy_options FROM system_schema.keyspaces WHERE keyspace_name = ?`
-	if err := session.Query(query, "swap_platform").Scan(&name, &durableWrites, &strategyClass, &strategyOptions); err != nil {
-		log.Printf("Failed to retrieve keyspace: %v", err)
-		return false
-	}
-	fmt.Printf("Keyspace: %s, DurableWrites: %s, StrategyClass: %s, StrategyOptions: %v\n", name, durableWrites, strategyClass, strategyOptions)
-	return true
 }
 
 func StartDatabase() {
