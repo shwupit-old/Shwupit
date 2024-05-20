@@ -120,8 +120,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		Hash:      hash,
 		Name:      handler.Filename,
 		ImagePath: newFilePath,
-		Created:   gocql.TimeUUID().Time(),
-		Updated:   gocql.TimeUUID().Time(),
+		Created:   gocql.TimeUUID(),
+		Updated:   gocql.TimeUUID(),
 	}
 
 	if err := db.InsertImage(image); err != nil {
