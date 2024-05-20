@@ -45,7 +45,7 @@ export default function AddToCart({
     }
     setCartingSuccess(true);
     addItemToCart(generateCartItem(item), 1);
-    toast.success(<b>{t('text-add-to-cart-message')}</b>, {
+    toast.success(<b>{t('text-request-swap-message')}</b>, {
       className: toastClassName,
     });
     setTimeout(() => {
@@ -65,7 +65,8 @@ export default function AddToCart({
       )}
       disabled={isInStock(item?.id)}
     >
-      {t('text-add-to-cart')} {withPrice && price}
+       {/* {withPrice && price} */}
+      {t('text-request-swap')}
       <svg
         viewBox="0 0 37 37"
         xmlns="http://www.w3.org/2000/svg"

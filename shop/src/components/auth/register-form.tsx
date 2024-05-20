@@ -1,3 +1,4 @@
+// RegisterUserForm.tsx
 import * as yup from 'yup';
 import type { SubmitHandler } from 'react-hook-form';
 import type { RegisterUserInput } from '@/types';
@@ -12,13 +13,16 @@ import Button from '@/components/ui/button';
 import { RegisterBgPattern } from '@/components/auth/register-bg-pattern';
 import { useState } from 'react';
 import useAuth from './use-auth';
-
 import { useTranslation } from 'next-i18next';
+import RegisterLocation from './register-location';
 
 const registerUserValidationSchema = yup.object().shape({
-  name: yup.string().max(20).required(),
+  firstName: yup.string().max(20).required(),
+  lastName: yup.string().max(20).required(),
+  username: yup.string().max(20).required(),
   email: yup.string().email().required(),
   password: yup.string().min(6).required(),
+  country: yup.string().required('Country is required'),
 });
 
 export default function RegisterUserForm() {
@@ -46,15 +50,13 @@ export default function RegisterUserForm() {
     mutate(data);
   };
 
-  
   return (
     <div className="bg-light px-6 pt-10 pb-8 dark:bg-dark-300 sm:px-8 lg:p-12">
-      <RegisterBgPattern className="absolute bottom-0 left-0 text-light dark:text-dark-300 dark:opacity-60" />
-      <div className="relative z-10 flex items-center">
-        <div className="w-full shrink-0 text-left md:w-[380px]">
+      <div className="relative z-10 flex items-center justify-center">
+        <div className="w-full max-w-2xl shrink-0 text-left">
           <div className="flex flex-col pb-5 text-center lg:pb-9 xl:pb-10 xl:pt-2">
             <h2 className="text-lg font-medium tracking-[-0.3px] text-dark dark:text-light lg:text-xl">
-              {t('text-welcome-back')}
+              {t('text-start-swapping')}
             </h2>
             <div className="mt-1.5 text-13px leading-6 tracking-[0.2px] dark:text-light-900 lg:mt-2.5 xl:mt-3">
               {t('text-create-an-account')}{' '}
@@ -73,26 +75,44 @@ export default function RegisterUserForm() {
             serverError={serverError}
             className="space-y-4 lg:space-y-5"
           >
-            {({ register, formState: { errors } }) => (
+            {({ register, setValue, formState: { errors } }) => (
               <>
+                <div className="flex space-x-4">
+                  <Input
+                    label="First Name"
+                    inputClassName="bg-light dark:bg-dark-300"
+                    {...register('firstName')}
+                    error={errors.firstName?.message}
+                  />
+                  <Input
+                    label="Last Name"
+                    inputClassName="bg-light dark:bg-dark-300"
+                    {...register('lastName')}
+                    error={errors.lastName?.message}
+                  />
+                </div>
                 <Input
-                  label="contact-us-name-field"
+                  label="Username"
                   inputClassName="bg-light dark:bg-dark-300"
-                  {...register('name')}
-                  error={errors.name?.message}
+                  {...register('username')}
+                  error={errors.username?.message}
                 />
                 <Input
-                  label="contact-us-email-field"
+                  label="Email"
                   inputClassName="bg-light dark:bg-dark-300"
                   type="email"
                   {...register('email')}
                   error={errors.email?.message}
                 />
                 <Password
-                  label="text-auth-password"
+                  label="Password"
                   inputClassName="bg-light dark:bg-dark-300"
                   {...register('password')}
                   error={errors.password?.message}
+                />
+                <RegisterLocation 
+                  onCountrySelect={(country) => setValue('country', country)} 
+                  error={errors.country?.message}
                 />
                 <Button
                   type="submit"

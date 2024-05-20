@@ -32,7 +32,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
     <div className="block">
       <div className="flex w-[calc(100%+32px)] flex-col justify-between border-b border-light-500 px-4 py-5 ltr:-ml-4 rtl:-mr-4 dark:border-dark-400 sm:flex-row sm:items-center sm:py-4 md:w-full md:px-0 ltr:md:ml-0 rtl:md:mr-0">
         <h2 className="text-sm tracking-tight text-dark dark:text-light">
-          {t('text-product-reviews')} (
+          {t('text-swap-reviews')} (
           {
             //@ts-ignore
             paginatorInfo?.total ?? 0

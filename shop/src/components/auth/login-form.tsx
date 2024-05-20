@@ -15,9 +15,23 @@ import toast from 'react-hot-toast';
 import { useMutation } from 'react-query';
 import * as yup from 'yup';
 
+// Custom validation function for email or username
+const emailOrUsernameSchema = yup
+  .string()
+  .test(
+    'is-email-or-username',
+    'Must be a valid email or username',
+    value => {
+      if (!value) return false;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(value) || value.trim().length > 0;
+    }
+  )
+  .required();
+
 const loginValidationSchema = yup.object().shape({
-  email: yup.string().email().required(),
-  // password: yup.string().required(), for testing propose
+  email: emailOrUsernameSchema,
+  password: yup.string().required(),
 });
 
 export default function LoginUserForm() {
@@ -42,12 +56,11 @@ export default function LoginUserForm() {
   };
   return (
     <div className="bg-light px-6 pb-8 pt-10 dark:bg-dark-300 sm:px-8 lg:p-12">
-      <RegisterBgPattern className="absolute bottom-0 left-0 text-light dark:text-dark-300 dark:opacity-60" />
       <div className="relative z-10 flex items-center">
         <div className="w-full shrink-0 text-left md:w-[380px]">
           <div className="flex flex-col pb-5 text-center xl:pb-6 xl:pt-2">
             <h2 className="text-lg font-medium tracking-[-0.3px] text-dark dark:text-light lg:text-xl">
-              {t('text-welcome-back')}
+              {t('text-start-swapping')}
             </h2>
             <div className="mt-1.5 text-13px leading-6 tracking-[0.2px] dark:text-light-900 lg:mt-2.5 xl:mt-3">
               {t('text-join-now')}{' '}
@@ -73,9 +86,9 @@ export default function LoginUserForm() {
             {({ register, formState: { errors } }) => (
               <>
                 <Input
-                  label="contact-us-email-field"
+                  label="contact-us-email-username-field"
                   inputClassName="bg-light dark:bg-dark-300"
-                  type="email"
+                  type="text"
                   {...register('email')}
                   error={errors.email?.message}
                 />

@@ -13,6 +13,7 @@ import FreeDownloadButton from './free-download-button';
 import FavoriteButton from '@/components/favorite/favorite-button';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
+import { SwapIcon } from '../icons/swap-icon';
 
 interface Props {
   product: Product;
@@ -74,16 +75,15 @@ export default function ProductDetailsPaper({ product, className }: Props) {
           </div>
           {!is_external && (
             <div className="flex space-x-6 border-y border-light-500 py-3 rtl:space-x-reverse dark:border-dark-400 sm:py-4 lg:border-0 lg:py-0">
-              {!isFreeItem && (
+
                 <div className="flex items-center tracking-[.1px] text-dark dark:text-light">
-                  <ShoppingCartIcon className="h-[18px] w-[18px] text-dark-900 ltr:mr-2.5 rtl:ml-2.5 dark:text-light-900" />
-                  {pluralize(t('text-sale'), orders_count, true)}
+                  <SwapIcon className="h-[18px] w-[18px] text-dark-900 ltr:mr-2.5 rtl:ml-2.5 dark:text-light-900 mr-5" />
+                  {pluralize(t('text-past-swap'), orders_count, true)}
                 </div>
-              )}
-              <div className="flex items-center tracking-[.1px] text-dark dark:text-light">
+              {/* <div className="flex items-center tracking-[.1px] text-dark dark:text-light">
                 <DownloadIcon className="h-[18px] w-[18px] text-dark-900 ltr:mr-2.5 rtl:ml-2.5 dark:text-light-900" />
                 {pluralize(t('text-download'), total_downloads, true)}
-              </div>
+              </div> */}
             </div>
           )}
         </div>
@@ -118,7 +118,7 @@ export default function ProductDetailsPaper({ product, className }: Props) {
             target="_blank"
             className="transition-fill-colors flex min-h-[46px] w-full flex-1 items-center justify-center gap-2 rounded border border-light-600 bg-transparent px-4 py-3 font-semibold text-dark duration-200 hover:bg-light-400 focus:bg-light-500 dark:border-dark-600 dark:text-light dark:hover:bg-dark-600 dark:focus:bg-dark-600 xs:w-auto sm:h-12 md:px-5"
           >
-            {t('text-live-preview')}
+            {t('text-message-swapper')}
           </a>
         )}
       </div>

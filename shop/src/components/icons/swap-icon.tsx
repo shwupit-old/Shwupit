@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function SwapIcon(props: React.SVGAttributes<{}>) {
+export const SwapIcon: React.FC<React.SVGAttributes<{}>> = (props) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" 
     width="20" height="20" fill="currentColor" className="bi bi-arrow-left-right" viewBox="0 0 16 16">

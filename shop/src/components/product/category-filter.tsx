@@ -19,7 +19,7 @@ function CategoryItem({
     <button
       onClick={onClick}
       className={cn(
-        'h-[30px] shrink-0 !rounded-full border py-1.5 px-3.5 text-xs font-medium outline-none',
+        'h-[30px] shrink-0 !rounded-base border py-1.5 px-3.5 text-xs font-medium outline-none',
         {
           'border-dark-100 bg-dark-100 text-light-100 transition-opacity duration-200 hover:opacity-90 focus:opacity-90 dark:border-light dark:bg-light dark:text-dark-100':
             isActive,

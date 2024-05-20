@@ -91,7 +91,6 @@ const Dropdown: React.FC<DropdownProps> = ({
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
           className={`w-full ${inputClassName}`}
-          placeholder="Select an option"
         />
         <button
           onClick={toggleDropdown}

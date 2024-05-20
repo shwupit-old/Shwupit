@@ -106,7 +106,7 @@ const NotificationSwitcher = () => {
                       {notification.type === 'Review Swap' && (
                         <div className="flex space-x-1 mt-0 mb-3">
                           {Array(5).fill(0).map((_, index) => (
-                            <StarIcon key={index} className="w-4 h-4 text-yellow-400" />
+                            <StarIcon key={index} className="w-4 h-4 text-blue-300" />
                           ))}
                         </div>
                       )}

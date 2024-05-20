@@ -36,7 +36,7 @@ const Password = forwardRef<HTMLInputElement, InputProps>(
               ref={ref}
               {...props}
               className={cn(
-                'h-11 w-full appearance-none rounded border border-light-500 bg-transparent py-2 text-13px text-dark ring-[0.5px] ring-light-500 focus:border-brand focus:ring-[0.5px] focus:ring-brand ltr:pl-4 ltr:pr-12 rtl:pr-4 rtl:pl-12 dark:border-dark-600 dark:text-light dark:ring-dark-600 dark:focus:border-brand dark:focus:ring-brand md:h-12 lg:pr-12 lg:pl-5 xl:h-[50px]',
+                'h-11 w-full appearance-none border border-light-500 bg-transparent py-2 text-18px text-dark ring-[0.5px] ring-light-500 focus:border-brand focus:ring-[0.5px] focus:ring-brand ltr:pl-4 ltr:pr-12 rtl:pr-4 rtl:pl-12 dark:border-dark-600 dark:text-light dark:ring-dark-600 dark:focus:border-brand dark:focus:ring-brand md:h-12 lg:pr-12 lg:pl-5 xl:h-[50px]',
                 inputClassName
               )}
             />

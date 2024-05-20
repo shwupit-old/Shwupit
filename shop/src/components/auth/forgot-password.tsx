@@ -47,15 +47,15 @@ function EmailForm({
   const { t } = useTranslation('common');
   const { openModal } = useModalAction();
   return (
-    <div className="bg-light px-6 pt-10 pb-8 dark:bg-dark-300 sm:px-8 lg:p-12">
-      <RegisterBgPattern className="absolute bottom-0 left-0 text-light dark:text-dark-300 dark:opacity-60" />
+    <div className="bg-white px-6 pt-10 pb-8 sm:px-8 lg:p-12">
+      <RegisterBgPattern className="absolute bottom-0 left-0 text-light opacity-60" />
       <div className="relative z-10 flex items-center">
         <div className="w-full shrink-0 text-left md:w-[380px]">
           <div className="flex flex-col pb-5 text-center lg:pb-9 xl:pb-10 xl:pt-2">
-            <h2 className="text-lg font-medium tracking-[-0.3px] text-dark dark:text-light lg:text-xl">
+            <h2 className="text-lg font-medium tracking-[-0.3px] text-dark lg:text-xl">
               {t('text-reset-password')}
             </h2>
-            <div className="mt-1.5 text-13px leading-6 tracking-[0.2px] dark:text-light-900 lg:mt-2.5 xl:mt-3">
+            <div className="mt-1.5 text-13px leading-6 tracking-[0.2px] text-dark lg:mt-2.5 xl:mt-3">
               {t('text-reset-password-title')}
             </div>
           </div>
@@ -87,8 +87,8 @@ function EmailForm({
               </>
             )}
           </Form>
-          <div className="relative mt-10 flex items-center justify-center border-t border-light-500 text-13px dark:border-dark-600">
-            <span className="absolute inline-flex bg-light px-2 pb-0.5 dark:bg-dark-300">
+          <div className="relative mt-10 flex items-center justify-center border-t border-gray-200 text-13px">
+            <span className="absolute inline-flex bg-white px-2 pb-0.5">
               {t('text-or')}
             </span>
           </div>
@@ -96,7 +96,7 @@ function EmailForm({
             {t('text-back-to')}{' '}
             <button
               type="button"
-              className="font-semibold text-brand hover:text-dark-400 hover:dark:text-light-500"
+              className="font-semibold text-brand hover:text-dark-400"
               onClick={() => openModal('LOGIN_VIEW')}
             >
               {t('text-login')}
@@ -124,16 +124,16 @@ function TokenForm({
   onBack: () => void;
 }) {
   return (
-    <div className="px-6 pt-10 pb-8 sm:px-8 lg:p-12">
-      <RegisterBgPattern className="absolute bottom-0 left-0 text-light dark:text-dark-300 dark:opacity-60" />
+    <div className="bg-white px-6 pt-10 pb-8 sm:px-8 lg:p-12">
+      <RegisterBgPattern className="absolute bottom-0 left-0 text-light opacity-60" />
       <div className="relative z-10">
         {message && (
           <div className="flex flex-col pb-5 text-center lg:pb-9 xl:pb-10 xl:pt-2">
-            <h2 className="text-lg font-medium tracking-[-0.3px] text-dark dark:text-light lg:text-xl">
+            <h2 className="text-lg font-medium tracking-[-0.3px] text-dark lg:text-xl">
               Check Your Email
             </h2>
-            <div className="mt-1.5 text-13px leading-6 tracking-[0.2px] dark:text-light-900 lg:mt-2.5 xl:mt-3">
-              We sent you a token to reset your password
+            <div className="mt-1.5 text-13px leading-6 tracking-[0.2px] text-dark lg:mt-2.5 xl:mt-3">
+              We sent you an OTP to reset your password
             </div>
           </div>
         )}
@@ -148,9 +148,9 @@ function TokenForm({
           {({ register, formState: { errors } }) => (
             <div className="w-full xs:w-[380px]">
               <Input
-                label="Enter Token"
+                label="Enter OTP"
                 {...register('token')}
-                error={errors.token?.message && 'Invalid token'}
+                error={errors.token?.message && 'Incorrect OTP'}
                 className="text-left"
               />
               <div className="mt-7 grid grid-cols-2 gap-5 text-13px">
@@ -162,7 +162,7 @@ function TokenForm({
                   isLoading={isLoading}
                   disabled={isLoading}
                 >
-                  Verify Token
+                  Verify OTP
                 </Button>
               </div>
             </div>
@@ -183,15 +183,15 @@ function PasswordForm({
   onBack: () => void;
 }) {
   return (
-    <div className="px-6 pt-10 pb-8 sm:px-8 lg:p-12">
-      <RegisterBgPattern className="absolute bottom-0 left-0 text-light dark:text-dark-300 dark:opacity-60" />
+    <div className="bg-white px-6 pt-10 pb-8 sm:px-8 lg:p-12">
+      <RegisterBgPattern className="absolute bottom-0 left-0 text-light opacity-60" />
       <div className="relative z-10">
         <div className="flex flex-col pb-5 text-center lg:pb-9 xl:pb-10 xl:pt-2">
-          <h2 className="text-lg font-medium tracking-[-0.3px] text-dark dark:text-light lg:text-xl">
+          <h2 className="text-lg font-medium tracking-[-0.3px] text-dark lg:text-xl">
             Reset Password
           </h2>
-          <div className="mt-1.5 text-13px leading-6 tracking-[0.2px] dark:text-light-900 lg:mt-2.5 xl:mt-3">
-            Almost there to reset your password
+          <div className="mt-1.5 text-13px leading-6 tracking-[0.2px] text-dark lg:mt-2.5 xl:mt-3">
+            You're almost there! Please reset your password.
           </div>
         </div>
         <Form<Pick<ResetPasswordInput, 'password'>>

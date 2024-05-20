@@ -98,7 +98,7 @@
   "token-required": "You must need to provide your token address",
   "confirm-password": "Please confirm password!",
   "password-should-match": "Passwords should match!",
-  "invalid-token": "Invalid Token!",
+  "invalid-token": "Incorrect OTP!",
   "status-required": "Status is required",
   "type-required": "Type is required",
   "amount-required": "Amount is required",
