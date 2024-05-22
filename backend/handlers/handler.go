@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gocql/gocql"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
@@ -30,6 +31,20 @@ func RegisterHandlers(router *mux.Router) {
 	router.HandleFunc("/savedItems", savedItemsHandler).Methods("GET", "POST", "OPTIONS")
 	router.HandleFunc("/payments", paymentsHandler).Methods("GET", "POST", "OPTIONS")
 	router.HandleFunc("/settings", settingsHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/me", meHandler).Methods("GET", "OPTIONS")
+}
+
+// JWT secret key
+var jwtSecretKey = []byte("eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcxNjM0NzM5MSwiaWF0IjoxNzE2MzQ3MzkxfQ.TclsttR3wTaNfIx-KIb_HUQzskJPjWeCkOSi6TcFsFA")
+
+// GenerateJWT generates a JWT token for the user
+func GenerateJWT(user model.User) (string, error) {
+	claims := &jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
+		Subject:   user.ID.String(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecretKey)
 }
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,8 +55,6 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
-
-	log.Printf("Received user data: %+v\n", user)
 
 	// Generate a new UUID for the user
 	user.ID = gocql.TimeUUID()
@@ -64,9 +77,17 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("User inserted: %+v\n", user)
+	// Generate JWT token
+	token, err := GenerateJWT(user)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+
+	// Return the token in the response
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request) {
@@ -410,4 +431,11 @@ func settingsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Settings handler triggered")
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{"message": "This is the settings endpoint"}`))
+}
+
+func meHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Me handler triggered")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"message": "This is the me endpoint"}`))
 }
