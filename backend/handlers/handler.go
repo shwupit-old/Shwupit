@@ -10,23 +10,63 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gocql/gocql"
+	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func RegisterHandlers() {
-	http.HandleFunc("/register", userHandler)
-	http.HandleFunc("/login", loginHandler)
-	http.HandleFunc("/upload", uploadHandler)
-	http.HandleFunc("/items", itemsHandler)
-	http.HandleFunc("/disputes", disputesHandler)
-	http.HandleFunc("/swaps", swapsHandler)
-	http.HandleFunc("/swapRequests", swapRequestsHandler)
-	http.HandleFunc("/ratings", ratingsHandler)
-	http.HandleFunc("/notifications", notificationsHandler)
-	http.HandleFunc("/savedItems", savedItemsHandler)
-	http.HandleFunc("/payments", paymentsHandler)
+func RegisterHandlers(router *mux.Router) {
+	router.HandleFunc("/register", RegisterUserHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/login", loginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/upload", uploadHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/items", itemsHandler).Methods("GET", "POST", "OPTIONS")
+	router.HandleFunc("/disputes", disputesHandler).Methods("GET", "POST", "OPTIONS")
+	router.HandleFunc("/swaps", swapsHandler).Methods("GET", "POST", "OPTIONS")
+	router.HandleFunc("/swapRequests", swapRequestsHandler).Methods("GET", "POST", "OPTIONS")
+	router.HandleFunc("/ratings", ratingsHandler).Methods("GET", "POST", "OPTIONS")
+	router.HandleFunc("/notifications", notificationsHandler).Methods("GET", "POST", "OPTIONS")
+	router.HandleFunc("/savedItems", savedItemsHandler).Methods("GET", "POST", "OPTIONS")
+	router.HandleFunc("/payments", paymentsHandler).Methods("GET", "POST", "OPTIONS")
+	router.HandleFunc("/settings", settingsHandler).Methods("GET", "OPTIONS")
+}
+
+func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
+	var user model.User
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&user); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("Received user data: %+v\n", user)
+
+	// Generate a new UUID for the user
+	user.ID = gocql.TimeUUID()
+
+	// Hash the user's password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.PasswordHash), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+		return
+	}
+	user.PasswordHash = string(hashedPassword)
+
+	// Manually set the created and updated timestamps
+	user.CreatedAt = time.Now().UTC()
+	user.UpdatedAt = user.CreatedAt
+
+	// Insert the user into the database
+	if err := db.InsertUser(user); err != nil {
+		http.Error(w, "Failed to insert user: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("User inserted: %+v\n", user)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(user)
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,19 +74,36 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		log.Println("Received a request to register a new user")
 		var user model.User
-		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading request body: %v", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
-		// Hash the password
+		log.Printf("Request body: %s", body)
+		if err := json.Unmarshal(body, &user); err != nil {
+			log.Printf("Error decoding request body: %v", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		log.Printf("Decoded user: %+v", user)
+		log.Printf("Type of user_rating: %T", user.UserRating)
+
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.PasswordHash), bcrypt.DefaultCost)
 		if err != nil {
 			http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 			return
 		}
 		user.PasswordHash = string(hashedPassword)
-		user.ID = gocql.TimeUUID() // Generate a new UUID for the user
+		user.ID = gocql.TimeUUID()
+
+		// Set PaymentDetails to a default value if not provided
+		if user.PaymentDetails == (gocql.UUID{}) {
+			user.PaymentDetails = gocql.TimeUUID()
+		}
+
 		if err := db.InsertUser(user); err != nil {
+			log.Printf("Failed to insert user: %v", err)
 			http.Error(w, "Failed to insert user", http.StatusInternalServerError)
 			return
 		}
@@ -120,8 +177,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		Hash:      hash,
 		Name:      handler.Filename,
 		ImagePath: newFilePath,
-		Created:   gocql.TimeUUID(),
-		Updated:   gocql.TimeUUID(),
+		Created:   time.Now(),
+		Updated:   time.Now(),
 	}
 
 	if err := db.InsertImage(image); err != nil {
@@ -346,4 +403,11 @@ func paymentsHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+
+}
+
+func settingsHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Settings handler triggered")
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"message": "This is the settings endpoint"}`))
 }

@@ -1,6 +1,10 @@
 package model
 
-import "github.com/gocql/gocql"
+import (
+	"time"
+
+	"github.com/gocql/gocql"
+)
 
 type User struct {
 	ID                gocql.UUID   `json:"id"`
@@ -9,23 +13,23 @@ type User struct {
 	PasswordHash      string       `json:"password_hash"`
 	FirstName         string       `json:"first_name"`
 	LastName          string       `json:"last_name"`
-	PhoneNumber       string       `json:"phone_number"`
+	Country           string       `json:"country"`
 	ProfilePictureURL string       `json:"profile_picture_url"`
 	UserRating        float32      `json:"user_rating"`
-	PaymentDetails    string       `json:"payment_details"`
-	CreatedAt         gocql.UUID   `json:"created_at"`
-	UpdatedAt         gocql.UUID   `json:"updated_at"`
+	PaymentDetails    gocql.UUID   `json:"payment_details"`
 	SavedItems        []gocql.UUID `json:"saved_items"`
+	CreatedAt         time.Time    `json:"created_at"`
+	UpdatedAt         time.Time    `json:"updated_at"`
 }
 
 type Image struct {
-	Hash             string     `json:"hash"`
-	Name             string     `json:"name"`
-	ImageDescription string     `json:"imageDescription"`
-	ImagePath        string     `json:"imagePath"`
-	Created          gocql.UUID `json:"created"`
-	Updated          gocql.UUID `json:"updated"`
-	Deleted          gocql.UUID `json:"deleted"`
+	Hash             string    `json:"hash"`
+	Name             string    `json:"name"`
+	ImageDescription string    `json:"imageDescription"`
+	ImagePath        string    `json:"imagePath"`
+	Created          time.Time `json:"created"`
+	Updated          time.Time `json:"updated"`
+	Deleted          time.Time `json:"deleted"`
 }
 
 type Item struct {
@@ -39,8 +43,8 @@ type Item struct {
 	City        string     `json:"city"`
 	Subcategory string     `json:"subcategory"`
 	Category    string     `json:"category"`
-	CreatedAt   gocql.UUID `json:"created_at"`
-	UpdatedAt   gocql.UUID `json:"updated_at"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 }
 
 type Dispute struct {
@@ -51,11 +55,11 @@ type Dispute struct {
 	DisputeReason      string     `json:"dispute_reason"`
 	DisputeStatus      string     `json:"dispute_status"`
 	DisputeDetails     string     `json:"dispute_details"`
-	CreatedAt          gocql.UUID `json:"created_at"`
-	UpdatedAt          gocql.UUID `json:"updated_at"`
+	CreatedAt          time.Time  `json:"created_at"`
+	UpdatedAt          time.Time  `json:"updated_at"`
 	ResolvedBy         gocql.UUID `json:"resolved_by"`
 	ResolutionDetails  string     `json:"resolution_details"`
-	ResolutionDate     gocql.UUID `json:"resolution_date"`
+	ResolutionDate     time.Time  `json:"resolution_date"`
 }
 
 type Swap struct {
@@ -66,16 +70,16 @@ type Swap struct {
 	CounterpartyItemID gocql.UUID `json:"counterparty_item_id"`
 	SwapStatus         string     `json:"swap_status"`
 	SwapValue          float32    `json:"swap_value"`
-	CreatedAt          gocql.UUID `json:"created_at"`
-	UpdatedAt          gocql.UUID `json:"updated_at"`
+	CreatedAt          time.Time  `json:"created_at"`
+	UpdatedAt          time.Time  `json:"updated_at"`
 }
 
 type SwapRequest struct {
 	ID            gocql.UUID `json:"id"`
 	SwapID        gocql.UUID `json:"swap_id"`
 	RequestStatus string     `json:"request_status"`
-	CreatedAt     gocql.UUID `json:"created_at"`
-	UpdatedAt     gocql.UUID `json:"updated_at"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
 }
 
 type Rating struct {
@@ -85,7 +89,7 @@ type Rating struct {
 	RevieweeID gocql.UUID `json:"reviewee_id"`
 	Rating     float32    `json:"rating"`
 	ReviewText string     `json:"review_text"`
-	CreatedAt  gocql.UUID `json:"created_at"`
+	CreatedAt  time.Time  `json:"created_at"`
 }
 
 type Notification struct {
@@ -94,7 +98,7 @@ type Notification struct {
 	NotificationType string     `json:"notification_type"`
 	NotificationText string     `json:"notification_text"`
 	ReadStatus       bool       `json:"read_status"`
-	CreatedAt        gocql.UUID `json:"created_at"`
+	CreatedAt        time.Time  `json:"created_at"`
 }
 
 type SavedItem struct {
@@ -102,7 +106,7 @@ type SavedItem struct {
 	UserID      gocql.UUID `json:"user_id"`
 	ItemID      gocql.UUID `json:"item_id"`
 	ItemDetails string     `json:"item_details"`
-	SavedAt     gocql.UUID `json:"saved_at"`
+	SavedAt     time.Time  `json:"saved_at"`
 }
 
 type Payment struct {
@@ -113,6 +117,6 @@ type Payment struct {
 	PaymentAmount         float32    `json:"payment_amount"`
 	PaymentStatus         string     `json:"payment_status"`
 	StripePaymentIntentID string     `json:"stripe_payment_intent_id"`
-	CreatedAt             gocql.UUID `json:"created_at"`
-	UpdatedAt             gocql.UUID `json:"updated_at"`
+	CreatedAt             time.Time  `json:"created_at"`
+	UpdatedAt             time.Time  `json:"updated_at"`
 }

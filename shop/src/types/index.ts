@@ -246,11 +246,13 @@ export interface LoginUserInput {
   email: string;
   password: string;
 }
-
 export interface RegisterUserInput {
-  name: string;
+  firstName: string;
+  lastName: string;
+  username: string;
   email: string;
   password: string;
+  country: string;
 }
 
 export interface ForgetPasswordInput {

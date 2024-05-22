@@ -21,14 +21,42 @@ func init() {
 }
 
 func InsertUser(user model.User) error {
-	cql := `INSERT INTO users (user_id, username, email, password_hash, first_name, last_name, phone_number, profile_picture_url, user_rating, payment_details, created_at, updated_at, saved_items) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	return session.Query(cql, user.ID, user.Username, user.Email, user.PasswordHash, user.FirstName, user.LastName, user.PhoneNumber, user.ProfilePictureURL, user.UserRating, user.PaymentDetails, user.CreatedAt, user.UpdatedAt, user.SavedItems).Exec()
+	query := `INSERT INTO users (
+        user_id, username, email, password_hash, first_name, last_name, country, 
+        profile_picture_url, user_rating, payment_details, created_at, updated_at, saved_items
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	err := session.Query(query,
+		user.ID,
+		user.Username,
+		user.Email,
+		user.PasswordHash,
+		user.FirstName,
+		user.LastName,
+		user.Country,
+		user.ProfilePictureURL,
+		user.UserRating,
+		user.PaymentDetails,
+		user.CreatedAt,
+		user.UpdatedAt,
+		user.SavedItems,
+	).Exec()
+	if err != nil {
+		return fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	return nil
 }
 
 func GetUserByUsernameOrEmail(identifier string) (model.User, error) {
 	var user model.User
-	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, phone_number, profile_picture_url, user_rating, payment_details, created_at, updated_at, saved_items FROM users WHERE username = ? OR email = ? LIMIT 1`
-	err := session.Query(cql, identifier, identifier).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName, &user.PhoneNumber, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails, &user.CreatedAt, &user.UpdatedAt, &user.SavedItems)
+	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, profile_picture_url, user_rating, payment_details, created_at, updated_at, saved_items 
+			FROM users WHERE username = ? OR email = ? LIMIT 1`
+	err := session.Query(cql, identifier, identifier).Scan(
+		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
+		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
+		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems,
+	)
 	return user, err
 }
 

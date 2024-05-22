@@ -47,6 +47,7 @@ export default function RegisterUserForm() {
   });
   
   const onSubmit: SubmitHandler<RegisterUserInput> = (data) => {
+    console.log("Form Data:", data); // Log the form data to verify structure
     mutate(data);
   };
 

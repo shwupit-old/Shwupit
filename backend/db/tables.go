@@ -40,10 +40,10 @@ func CreateUsersTable(session *gocql.Session) {
 		password_hash TEXT,
 		first_name TEXT,
 		last_name TEXT,
-		phone_number TEXT,
+		country TEXT,
 		profile_picture_url TEXT,
-		user_rating DECIMAL,
-		payment_details TEXT,
+		user_rating FLOAT,
+		payment_details UUID,
 		created_at TIMESTAMP,
 		updated_at TIMESTAMP,
 		saved_items LIST<UUID>
