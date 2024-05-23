@@ -13,6 +13,7 @@ import routes from '@/config/routes';
 import { useSettings } from '@/data/settings';
 import { useMe } from '@/data/user';
 import { useModalAction } from '@/components/modal-views/context';
+import { useEffect, useState } from 'react';
 import {
   RESPONSIVE_WIDTH,
   checkIsMaintenanceModeComing,
@@ -32,8 +33,6 @@ interface HeaderProps {
   onClickHamburger?: () => void;
 }
 
-
-
 export default function Header({
   isCollapse,
   showHamburger = false,
@@ -51,6 +50,12 @@ export default function Header({
 
   useSwapBodyClassOnScrollDirection();
   const [isScrolling] = useAtom(checkIsScrollingStart);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <>
       {width >= RESPONSIVE_WIDTH && underMaintenanceIsComing && !isScrolling ? (
@@ -77,7 +82,7 @@ export default function Header({
               className="hidden sm:flex"
             />
           )}
-      <Logo />
+          <Logo />
         </div>
         <div className="relative flex items-center gap-5 pr-0.5 xs:gap-6 sm:gap-7">
           <SearchButton className="hidden sm:flex" />
@@ -93,20 +98,20 @@ export default function Header({
           ) : (
             ''
           )}
-
-          <button
-            onClick={() => {
-              if (!isAuthorized) {
-                openModal('LOGIN_VIEW');
-              } else {
-                router.push(routes.createItem); //router.push to navigate
-              }
-            }}
-            className="focus:ring-accent-700 hidden h-9 shrink-0 items-center justify-center border-transparent bg-brand px-3 py-0 text-sm font-semibold leading-none text-light outline-none transition duration-300 ease-in-out hover:bg-brand-dark focus:shadow focus:outline-none focus:ring-1 sm:inline-flex"
-          >
-            {isAuthorized ? 'Swap Now' : t('text-become-seller')}
-          </button>
-
+          {isClient && (
+            <button
+              onClick={() => {
+                if (!isAuthorized) {
+                  openModal('LOGIN_VIEW');
+                } else {
+                  router.push(routes.createItem);
+                }
+              }}
+              className="focus:ring-accent-700 hidden h-9 shrink-0 items-center justify-center border-transparent bg-brand px-3 py-0 text-sm font-semibold leading-none text-light outline-none transition duration-300 ease-in-out hover:bg-brand-dark focus:shadow focus:outline-none focus:ring-1 sm:inline-flex"
+            >
+              {isAuthorized ? t('text-swap-now') : t('text-become-seller')}
+            </button>
+          )}
           <LoginMenu />
         </div>
       </header>
