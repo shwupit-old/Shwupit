@@ -57,14 +57,6 @@ func CreateUsersTable(session *gocql.Session) {
 	fmt.Println("Table 'users' created successfully")
 }
 
-func AddBioColumn(session *gocql.Session) {
-	cql := `ALTER TABLE users ADD bio TEXT;`
-
-	if err := session.Query(cql).Exec(); err != nil {
-		log.Fatalf("Failed to add bio column: %v", err)
-	}
-	fmt.Println("Column 'bio' added successfully")
-}
 func ClearDatabase(session *gocql.Session) {
 	tables := []string{"users", "items", "disputes", "swaps", "swap_requests", "ratings", "notifications", "saved_items", "payments", "images"}
 
@@ -255,5 +247,4 @@ func StartDatabase() {
 	CreateSavedItemsTable(session)
 	CreatePaymentsTable(session)
 	CreateImagesTable(session)
-	AddBioColumn(session)
 }

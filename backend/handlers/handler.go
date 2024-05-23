@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -31,6 +32,7 @@ func RegisterHandlers(router *mux.Router) {
 	router.HandleFunc("/savedItems", savedItemsHandler).Methods("GET", "POST", "OPTIONS")
 	router.HandleFunc("/payments", paymentsHandler).Methods("GET", "POST", "OPTIONS")
 	router.HandleFunc("/settings", settingsHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/user/me", meHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/me", meHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/logout", logoutHandler).Methods("POST", "OPTIONS")
 }
@@ -472,8 +474,62 @@ func settingsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func meHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Me handler triggered")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Get the token from the Authorization header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+		return
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == "" {
+		http.Error(w, "Bearer token is required", http.StatusUnauthorized)
+		return
+	}
+
+	// Parse the token
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecretKey, nil
+	})
+
+	if err != nil {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	if !token.Valid {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	claims, ok := token.Claims.(*jwt.StandardClaims)
+	if !ok {
+		http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+		return
+	}
+
+	// Fetch the user data from the database
+	userID, err := gocql.ParseUUID(claims.Subject)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := db.GetUserByID(userID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"message": "This is the me endpoint"}`))
+	json.NewEncoder(w).Encode(user)
 }

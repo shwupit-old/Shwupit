@@ -18,7 +18,7 @@ export default function useAuth() {
     const token = getAuthToken();
     if (token) {
       try {
-        const response = await axios.get('/api/user/me', {
+        const response = await axios.get('http://localhost:8080/api/user/me', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

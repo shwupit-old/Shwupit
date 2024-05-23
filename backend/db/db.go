@@ -66,6 +66,20 @@ func GetUserByUsernameOrEmail(identifier string) (model.User, error) {
 	return user, err
 }
 
+func GetUserByID(userID gocql.UUID) (model.User, error) {
+	var user model.User
+	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
+			profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+			saved_items, currency, bio 
+			FROM users WHERE user_id = ? LIMIT 1`
+	err := session.Query(cql, userID).Scan(
+		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
+		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
+		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems, &user.Currency, &user.Bio,
+	)
+	return user, err
+}
+
 func InsertItem(item model.Item) error {
 	cql := `INSERT INTO items (item_id, user_id, item_photo, item_name, description, price, country, city, subcategory, category, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	return session.Query(cql, item.ID, item.UserID, item.ItemPhoto, item.ItemName, item.Description, item.Price, item.Country, item.City, item.Subcategory, item.Category, item.CreatedAt, item.UpdatedAt).Exec()
