@@ -55,14 +55,51 @@ func InsertUser(user model.User) error {
 func GetUserByUsernameOrEmail(identifier string) (model.User, error) {
 	var user model.User
 	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
-			profile_picture_url, user_rating, payment_details, created_at, updated_at, 
-			saved_items, currency, bio 
-			FROM users WHERE username = ? OR email = ? LIMIT 1`
+            profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+            saved_items, currency, bio 
+            FROM users WHERE username = ? OR email = ? LIMIT 1`
 	err := session.Query(cql, identifier, identifier).Scan(
 		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
 		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
 		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems, &user.Currency, &user.Bio,
 	)
+	if err == gocql.ErrNotFound {
+		return model.User{}, nil
+	}
+	return user, err
+}
+
+func GetUserByUsername(username string) (model.User, error) {
+	var user model.User
+	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
+            profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+            saved_items, currency, bio 
+            FROM users WHERE username = ? LIMIT 1`
+	err := session.Query(cql, username).Scan(
+		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
+		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
+		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems, &user.Currency, &user.Bio,
+	)
+	if err == gocql.ErrNotFound {
+		return model.User{}, nil
+	}
+	return user, err
+}
+
+func GetUserByEmail(email string) (model.User, error) {
+	var user model.User
+	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
+            profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+            saved_items, currency, bio 
+            FROM users WHERE email = ? LIMIT 1`
+	err := session.Query(cql, email).Scan(
+		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
+		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
+		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems, &user.Currency, &user.Bio,
+	)
+	if err == gocql.ErrNotFound {
+		return model.User{}, nil
+	}
 	return user, err
 }
 
@@ -72,7 +109,7 @@ func GetUserByID(userID gocql.UUID) (model.User, error) {
 			profile_picture_url, user_rating, payment_details, created_at, updated_at, 
 			saved_items, currency, bio 
 			FROM users WHERE user_id = ? LIMIT 1`
-	err := session.Query(cql, userID).Scan(
+	err := session.Query(cql, userID).Consistency(gocql.One).Scan(
 		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
 		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
 		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems, &user.Currency, &user.Bio,

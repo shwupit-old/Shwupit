@@ -1,13 +1,17 @@
 package main
 
 import (
+	"api/db"
 	"api/handlers"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
+	db.StartDatabase()
+	log.Println("Database started successfully")
 	router := mux.NewRouter()
 
 	// Apply CORS middleware to all routes

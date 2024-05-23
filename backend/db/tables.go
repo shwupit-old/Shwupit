@@ -34,27 +34,41 @@ func CreateKeyspace(session *gocql.Session) {
 
 func CreateUsersTable(session *gocql.Session) {
 	cql := `CREATE TABLE IF NOT EXISTS users (
-		user_id UUID PRIMARY KEY,
-		username TEXT,
-		email TEXT,
-		password_hash TEXT,
-		first_name TEXT,
-		last_name TEXT,
-		country TEXT,
-		profile_picture_url TEXT,
-		user_rating FLOAT,
-		payment_details UUID,
-		created_at TIMESTAMP,
-		updated_at TIMESTAMP,
-		saved_items LIST<UUID>,
-		currency TEXT,
-		bio TEXT
-	);`
+        user_id UUID PRIMARY KEY,
+        username TEXT,
+        email TEXT,
+        password_hash TEXT,
+        first_name TEXT,
+        last_name TEXT,
+        country TEXT,
+        profile_picture_url TEXT,
+        user_rating FLOAT,
+        payment_details UUID,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        saved_items LIST<UUID>,
+        currency TEXT,
+        bio TEXT
+    );`
 
 	if err := session.Query(cql).Exec(); err != nil {
 		log.Fatalf("Failed to create table: %v", err)
 	}
 	fmt.Println("Table 'users' created successfully")
+}
+
+func CreateUsersTableIndexes(session *gocql.Session) {
+	indexes := []string{
+		"CREATE INDEX IF NOT EXISTS username_idx ON users (username);",
+		"CREATE INDEX IF NOT EXISTS email_idx ON users (email);",
+	}
+
+	for _, index := range indexes {
+		if err := session.Query(index).Exec(); err != nil {
+			log.Fatalf("Failed to create index: %v", err)
+		}
+		fmt.Println("Index created successfully")
+	}
 }
 
 func ClearDatabase(session *gocql.Session) {
@@ -236,6 +250,7 @@ func StartDatabase() {
 		log.Fatalf("Could not connect to Cassandra: %v", err)
 	}
 
+	CreateUsersTableIndexes(session)
 	CreateKeyspace(session)
 	CreateUsersTable(session)
 	CreateItemsTable(session)

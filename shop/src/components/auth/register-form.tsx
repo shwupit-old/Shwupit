@@ -14,6 +14,7 @@ import { useState } from 'react';
 import useAuth from './use-auth';
 import { useTranslation } from 'next-i18next';
 import RegisterLocation from './register-location';
+import axios from 'axios';
 
 const registerUserValidationSchema = yup.object().shape({
   firstName: yup.string().max(20).required(),
@@ -25,11 +26,17 @@ const registerUserValidationSchema = yup.object().shape({
   bio: yup.string().max(500).nullable(), // Make bio nullable
 });
 
+type ServerError = {
+  username?: string;
+  email?: string;
+};
+
 export default function RegisterUserForm() {
   const { t } = useTranslation('common');
   const { openModal, closeModal } = useModalAction();
   const { authorize } = useAuth();
-  let [serverError, setServerError] = useState<RegisterUserInput | null>(null);
+  let [serverError, setServerError] = useState<ServerError | null>(null);
+
   const { mutate } = useMutation(client.users.register, {
     onSuccess: (res) => {
       if (!res.token) {
@@ -42,13 +49,26 @@ export default function RegisterUserForm() {
       closeModal();
     },
     onError: (err: any) => {
-      setServerError(err.response.data);
-      toast.error(err.response.data.message || 'Registration failed');
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
+        // Handle conflict errors
+        const errorMessage = err.response.data;
+        if (errorMessage.includes("Username already exists")) {
+          setServerError({ username: errorMessage });
+          toast.error("Username already exists");
+        } else if (errorMessage.includes("Email already exists")) {
+          setServerError({ email: errorMessage });
+          toast.error("Email already exists");
+        }
+      } else {
+        setServerError(err.response?.data || null);
+        toast.error(err.response?.data?.message || 'Registration failed');
+      }
     },
   });
 
   const onSubmit: SubmitHandler<RegisterUserInput> = (data) => {
     console.log("Form Data:", data); // Log the form data to verify structure
+    setServerError(null); // Clear previous errors
     mutate(data);
   };
 
@@ -97,14 +117,14 @@ export default function RegisterUserForm() {
                   label="Username"
                   inputClassName="bg-light dark:bg-dark-300"
                   {...register('username')}
-                  error={errors.username?.message}
+                  error={errors.username?.message || serverError?.username}
                 />
                 <Input
                   label="Email"
                   inputClassName="bg-light dark:bg-dark-300"
                   type="email"
                   {...register('email')}
-                  error={errors.email?.message}
+                  error={errors.email?.message || serverError?.email}
                 />
                 <Password
                   label="Password"

@@ -70,16 +70,43 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received registration request")
 	var user model.User
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&user); err != nil {
+		log.Printf("Invalid request payload: %v", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	// Log the received user object
-	log.Printf("Received user before setting fields: %+v\n", user)
+	log.Printf("Registering user: %+v", user)
+
+	// Check if the username already exists
+	existingUser, err := db.GetUserByUsername(user.Username)
+	if err != nil {
+		log.Printf("Error checking username: %v", err)
+		http.Error(w, "Error checking username", http.StatusInternalServerError)
+		return
+	}
+	if existingUser.Username != "" {
+		log.Printf("Username already exists: %s", user.Username)
+		http.Error(w, "Username already exists", http.StatusConflict)
+		return
+	}
+
+	// Check if the email already exists
+	existingUser, err = db.GetUserByEmail(user.Email)
+	if err != nil {
+		log.Printf("Error checking email: %v", err)
+		http.Error(w, "Error checking email", http.StatusInternalServerError)
+		return
+	}
+	if existingUser.Email != "" {
+		log.Printf("Email already exists: %s", user.Email)
+		http.Error(w, "Email already exists", http.StatusConflict)
+		return
+	}
 
 	// Generate a new UUID for the user
 	user.ID = gocql.TimeUUID()
@@ -87,6 +114,7 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Hash the user's password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.PasswordHash), bcrypt.DefaultCost)
 	if err != nil {
+		log.Printf("Failed to hash password: %v", err)
 		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 		return
 	}
@@ -105,11 +133,9 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		user.PaymentDetails = gocql.TimeUUID()
 	}
 
-	// Log the user object after setting fields
-	log.Printf("Received user after setting fields: %+v\n", user)
-
 	// Insert the user into the database
 	if err := db.InsertUser(user); err != nil {
+		log.Printf("Failed to insert user: %v", err)
 		http.Error(w, "Failed to insert user: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -117,6 +143,7 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate JWT token
 	token, err := GenerateJWT(user)
 	if err != nil {
+		log.Printf("Failed to generate token: %v", err)
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
 	}
@@ -128,6 +155,7 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		"token": token,
 		"user":  user,
 	})
+	log.Println("User registered successfully")
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request) {
