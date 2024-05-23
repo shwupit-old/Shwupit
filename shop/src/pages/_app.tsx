@@ -48,13 +48,12 @@ function CustomApp({ Component, pageProps }: AppPropsWithLayout) {
   }, [dir]);
   const authenticationRequired = Component.authorization ?? false;
   return (
-    
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
+          defaultTheme="light"
+          enableSystem={true}
         >
           <SearchProvider>
             <CartProvider>
