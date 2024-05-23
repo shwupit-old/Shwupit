@@ -32,6 +32,7 @@ func RegisterHandlers(router *mux.Router) {
 	router.HandleFunc("/payments", paymentsHandler).Methods("GET", "POST", "OPTIONS")
 	router.HandleFunc("/settings", settingsHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/me", meHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/logout", logoutHandler).Methods("POST", "OPTIONS")
 }
 
 // JWT secret key
@@ -47,6 +48,25 @@ func GenerateJWT(user model.User) (string, error) {
 	return token.SignedString(jwtSecretKey)
 }
 
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	// Set CORS headers if necessary
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	// Handle preflight request
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Inform the client that the logout was successful
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Logged out successfully",
+	})
+}
+
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	var user model.User
 
@@ -55,6 +75,9 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
+
+	// Log the received user object
+	log.Printf("Received user before setting fields: %+v\n", user)
 
 	// Generate a new UUID for the user
 	user.ID = gocql.TimeUUID()
@@ -71,6 +94,18 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	user.CreatedAt = time.Now().UTC()
 	user.UpdatedAt = user.CreatedAt
 
+	// Ensure optional fields are initialized
+	if user.Bio == "" {
+		user.Bio = ""
+	}
+
+	if user.PaymentDetails == (gocql.UUID{}) {
+		user.PaymentDetails = gocql.TimeUUID()
+	}
+
+	// Log the user object after setting fields
+	log.Printf("Received user after setting fields: %+v\n", user)
+
 	// Insert the user into the database
 	if err := db.InsertUser(user); err != nil {
 		http.Error(w, "Failed to insert user: "+err.Error(), http.StatusInternalServerError)
@@ -84,10 +119,13 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return the token in the response
+	// Return the token and user data in the response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"token": token,
+		"user":  user,
+	})
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request) {

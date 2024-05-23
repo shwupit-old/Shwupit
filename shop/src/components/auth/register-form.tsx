@@ -1,4 +1,3 @@
-// RegisterUserForm.tsx
 import * as yup from 'yup';
 import type { SubmitHandler } from 'react-hook-form';
 import type { RegisterUserInput } from '@/types';
@@ -23,6 +22,7 @@ const registerUserValidationSchema = yup.object().shape({
   email: yup.string().email().required(),
   password: yup.string().min(6).required(),
   country: yup.string().required('Country is required'),
+  bio: yup.string().max(500).nullable(), // Make bio nullable
 });
 
 export default function RegisterUserForm() {
@@ -43,9 +43,10 @@ export default function RegisterUserForm() {
     },
     onError: (err: any) => {
       setServerError(err.response.data);
+      toast.error(err.response.data.message || 'Registration failed');
     },
   });
-  
+
   const onSubmit: SubmitHandler<RegisterUserInput> = (data) => {
     console.log("Form Data:", data); // Log the form data to verify structure
     mutate(data);
@@ -111,8 +112,9 @@ export default function RegisterUserForm() {
                   {...register('password')}
                   error={errors.password?.message}
                 />
-                <RegisterLocation 
-                  onCountrySelect={(country) => setValue('country', country)} 
+                <RegisterLocation
+                  onCountrySelect={(country) => setValue('country', country)}
+                  setCurrency={(currency) => setValue('currency', currency as string)}  
                   error={errors.country?.message}
                 />
                 <Button

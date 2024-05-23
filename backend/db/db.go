@@ -22,9 +22,10 @@ func init() {
 
 func InsertUser(user model.User) error {
 	query := `INSERT INTO users (
-        user_id, username, email, password_hash, first_name, last_name, country, 
-        profile_picture_url, user_rating, payment_details, created_at, updated_at, saved_items
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		user_id, username, email, password_hash, first_name, last_name, country, 
+		profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+		saved_items, currency, bio
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	err := session.Query(query,
 		user.ID,
@@ -40,8 +41,11 @@ func InsertUser(user model.User) error {
 		user.CreatedAt,
 		user.UpdatedAt,
 		user.SavedItems,
+		user.Currency,
+		user.Bio,
 	).Exec()
 	if err != nil {
+		log.Printf("Failed to execute query: %v", err)
 		return fmt.Errorf("failed to execute query: %w", err)
 	}
 
@@ -50,12 +54,14 @@ func InsertUser(user model.User) error {
 
 func GetUserByUsernameOrEmail(identifier string) (model.User, error) {
 	var user model.User
-	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, profile_picture_url, user_rating, payment_details, created_at, updated_at, saved_items 
+	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
+			profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+			saved_items, currency, bio 
 			FROM users WHERE username = ? OR email = ? LIMIT 1`
 	err := session.Query(cql, identifier, identifier).Scan(
 		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
 		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
-		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems,
+		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems, &user.Currency, &user.Bio,
 	)
 	return user, err
 }

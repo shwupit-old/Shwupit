@@ -253,6 +253,8 @@ export interface RegisterUserInput {
   email: string;
   password: string;
   country: string;
+  currency: string; 
+  bio: string;
 }
 
 export interface ForgetPasswordInput {

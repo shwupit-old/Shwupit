@@ -1,14 +1,14 @@
-// RegisterLocation.tsx
 import React, { useState, useEffect } from 'react';
 import Dropdown from '../ui/create-swap/components/dropdown-container';
 import axios from 'axios';
 
 interface RegisterLocationProps {
   onCountrySelect: (country: string) => void;
+  setCurrency: React.Dispatch<React.SetStateAction<string>>;
   error?: string;
 }
 
-const RegisterLocation: React.FC<RegisterLocationProps> = ({ onCountrySelect, error }) => {
+const RegisterLocation: React.FC<RegisterLocationProps> = ({ onCountrySelect, setCurrency, error }) => {
   const [countries, setCountries] = useState<{ country: string, iso2: string }[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>('');
 
@@ -29,6 +29,31 @@ const RegisterLocation: React.FC<RegisterLocationProps> = ({ onCountrySelect, er
         console.error('Error fetching countries', error);
       });
   }, []);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const countryData = countries.find(c => c.country === selectedCountry);
+      if (countryData && countryData.iso2) {
+        fetchCurrency(countryData.iso2);
+      }
+    }
+  }, [selectedCountry, countries]);
+
+  const fetchCurrency = (iso2: string) => {
+    axios.post('https://countriesnow.space/api/v0.1/countries/currency', { iso2 })
+      .then(response => {
+        if (response.data && response.data.data && !response.data.error) {
+          setCurrency(response.data.data.currency);
+        } else {
+          console.error('Failed to fetch currency:', response.data.msg);
+          setCurrency(''); // Reset currency if fetch fails
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching currency', error);
+        setCurrency(''); // Reset currency on error
+      });
+  };
 
   const handleCountrySelect = (country: string) => {
     setSelectedCountry(country);

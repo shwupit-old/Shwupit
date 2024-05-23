@@ -3,39 +3,29 @@ import axios from 'axios';
 import Router from 'next/router';
 import { getAuthToken, removeAuthToken } from './token.utils';
 
-// TODO: Due to windows timeout was set to 15000
 const Axios = axios.create({
   baseURL: process.env.NEXT_PUBLIC_REST_API_ENDPOINT,
-  timeout: 150000000,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
-// Change request data/error here
+
 Axios.interceptors.request.use(
   (config) => {
     const token = getAuthToken();
-    //@ts-ignore
-    config.headers = {
-      ...config.headers,
-      Authorization: `Bearer ${token ? token : ''}`,
-    };
+    if (config.headers) {
+      config.headers.Authorization = `Bearer ${token ? token : ''}`;
+    }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 Axios.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (
-      (error.response && error.response.status === 401) ||
-      (error.response && error.response.status === 403) ||
-      (error.response &&
-        error.response.data.message === 'PIXER_ERROR.NOT_AUTHORIZED')
-    ) {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       removeAuthToken();
       Router.reload();
     }
@@ -43,23 +33,23 @@ Axios.interceptors.response.use(
   }
 );
 
-export class HttpClient {
-  static async get<T>(url: string, params?: unknown) {
+class HttpClient {
+  static async get<T>(url: string, params?: unknown): Promise<T> {
     const response = await Axios.get<T>(url, { params });
     return response.data;
   }
 
-  static async post<T>(url: string, data: unknown, options?: any) {
+  static async post<T>(url: string, data: unknown, options?: any): Promise<T> {
     const response = await Axios.post<T>(url, data, options);
     return response.data;
   }
 
-  static async put<T>(url: string, data: unknown) {
+  static async put<T>(url: string, data: unknown): Promise<T> {
     const response = await Axios.put<T>(url, data);
     return response.data;
   }
 
-  static async delete<T>(url: string) {
+  static async delete<T>(url: string): Promise<T> {
     const response = await Axios.delete<T>(url);
     return response.data;
   }
@@ -72,7 +62,9 @@ export class HttpClient {
     return this.post('/login', credentials);
   }
 
-  
+  static async logout() {
+    return this.post('/logout', {});
+  }
 
   static formatSearchParams(params: Partial<SearchParamOptions>) {
     return Object.entries(params)
@@ -85,3 +77,5 @@ export class HttpClient {
       .join(';');
   }
 }
+
+export { HttpClient };
