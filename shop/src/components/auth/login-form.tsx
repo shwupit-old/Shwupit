@@ -30,7 +30,7 @@ const emailOrUsernameSchema = yup
   .required();
 
 const loginValidationSchema = yup.object().shape({
-  email: emailOrUsernameSchema,
+  identifier: emailOrUsernameSchema,
   password: yup.string().required(),
 });
 
@@ -50,10 +50,17 @@ export default function LoginUserForm() {
       setAuthCredentials(data.token, data.permissions);
       closeModal();
     },
+    onError: (error) => {
+      toast.error(<b>{t('text-wrong-user-name-and-pass')}</b>, {
+        className: '-mt-10 xs:mt-0',
+      });
+    },
   });
+
   const onSubmit: SubmitHandler<LoginUserInput> = (data) => {
     login(data);
   };
+
   return (
     <div className="bg-light px-6 pb-8 pt-10 dark:bg-dark-300 sm:px-8 lg:p-12">
       <div className="relative z-10 flex items-center">
@@ -75,22 +82,16 @@ export default function LoginUserForm() {
           <Form<LoginUserInput>
             onSubmit={onSubmit}
             validationSchema={loginValidationSchema}
-            useFormProps={{
-              defaultValues: {
-                email: 'customer@demo.com',
-                password: 'demodemo',
-              },
-            }}
             className="space-y-4 pt-4 lg:space-y-5"
           >
             {({ register, formState: { errors } }) => (
               <>
                 <Input
-                  label="contact-us-email-username-field"
+                  label="Username or Email"
                   inputClassName="bg-light dark:bg-dark-300"
                   type="text"
-                  {...register('email')}
-                  error={errors.email?.message}
+                  {...register('identifier')}
+                  error={errors.identifier?.message}
                 />
                 <Password
                   label="text-auth-password"
@@ -101,7 +102,6 @@ export default function LoginUserForm() {
                 <div className="flex items-center justify-between space-x-5 rtl:space-x-reverse">
                   <CheckBox
                     label="text-remember-me"
-                    // inputClassName="bg-light dark:bg-dark-300"
                   />
                   <button
                     type="button"

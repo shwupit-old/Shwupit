@@ -243,7 +243,7 @@ export interface ContactInput {
 }
 
 export interface LoginUserInput {
-  email: string;
+  identifier: string;
   password: string;
 }
 export interface RegisterUserInput {

@@ -54,21 +54,49 @@ func InsertUser(user model.User) error {
 
 func GetUserByUsernameOrEmail(identifier string) (model.User, error) {
 	var user model.User
-	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
-            profile_picture_url, user_rating, payment_details, created_at, updated_at, 
-            saved_items, currency, bio 
-            FROM users WHERE username = ? OR email = ? LIMIT 1`
-	err := session.Query(cql, identifier, identifier).Scan(
-		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
-		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
-		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems, &user.Currency, &user.Bio,
-	)
-	if err == gocql.ErrNotFound {
-		return model.User{}, nil
-	}
-	return user, err
-}
 
+	// Try to get the user by username first
+	queryUsername := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
+		profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+		saved_items, currency, bio 
+		FROM users WHERE username = ? LIMIT 1`
+
+	err := session.Query(queryUsername, identifier).Consistency(gocql.One).Scan(
+		&user.ID, &user.Username, &user.Email, &user.PasswordHash,
+		&user.FirstName, &user.LastName, &user.Country,
+		&user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
+		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems,
+		&user.Currency, &user.Bio,
+	)
+
+	// If user is found by username, return it
+	if err == nil {
+		return user, nil
+	}
+
+	// If no user is found by username, try to get the user by email
+	if err == gocql.ErrNotFound {
+		queryEmail := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
+			profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+			saved_items, currency, bio 
+			FROM users WHERE email = ? LIMIT 1`
+
+		err = session.Query(queryEmail, identifier).Consistency(gocql.One).Scan(
+			&user.ID, &user.Username, &user.Email, &user.PasswordHash,
+			&user.FirstName, &user.LastName, &user.Country,
+			&user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
+			&user.CreatedAt, &user.UpdatedAt, &user.SavedItems,
+			&user.Currency, &user.Bio,
+		)
+
+		if err == nil {
+			return user, nil
+		}
+	}
+
+	// If no user is found by either username or email, return the error
+	return model.User{}, fmt.Errorf("failed to retrieve user: %v", err)
+}
 func GetUserByUsername(username string) (model.User, error) {
 	var user model.User
 	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
