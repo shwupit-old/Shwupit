@@ -74,8 +74,8 @@ export default function Uploader({
           className: cn(
             'relative border-dashed border-2 border-light-500 dark:border-dark-600 text-center flex flex-col justify-center hover:text-black dark:hover:text-light items-center cursor-pointer focus:border-accent-400 focus:outline-none',
             {
-              'h-20 w-20 rounded-md shrink-0': multiple === true,
-              'h-36 w-full rounded': multiple === false,
+              'h-25 w-20 rounded-md shrink-0': multiple === true,
+              'h-40 w-full rounded': multiple === false,
             }
           ),
         })}
@@ -110,7 +110,7 @@ export default function Uploader({
                   </Button>
                 </div>
               ))
-            : 'Upload Your Avatar Image (80 X 80)'
+            : 'Upload Your Profile Picture'
           : !isLoading && <PlusIcon className="h-5 w-5" />}
 
         {isLoading && (

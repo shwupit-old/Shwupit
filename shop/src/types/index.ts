@@ -217,18 +217,20 @@ export interface User {
   created_at: string;
   updated_at: string;
 }
-
 export interface UpdateProfileInput {
   id: string;
-  name: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  country: string;
+  currency: string;
   profile: {
     id?: string;
     bio?: string;
-    contact?: string;
     avatar?: Attachment | null;
   };
 }
-
 export interface ChangePasswordInput {
   oldPassword: string;
   newPassword: string;

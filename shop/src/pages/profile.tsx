@@ -11,7 +11,6 @@ import DashboardLayout from '@/layouts/_dashboard';
 import { Form } from '@/components/ui/forms/form';
 import Input from '@/components/ui/forms/input';
 import Textarea from '@/components/ui/forms/textarea';
-import { ReactPhone } from '@/components/ui/forms/phone-input';
 import Button from '@/components/ui/button';
 import client from '@/data/client';
 import { fadeInBottom } from '@/lib/framer-motion/fade-in-bottom';
@@ -19,15 +18,20 @@ import { useMe } from '@/data/user';
 import pick from 'lodash/pick';
 import { API_ENDPOINTS } from '@/data/client/endpoints';
 import Uploader from '@/components/ui/forms/uploader';
+import RegisterLocation from '@/components/auth/register-location';
 import * as yup from 'yup';
 
 const profileValidationSchema = yup.object().shape({
   id: yup.string().required(),
-  name: yup.string().required(),
+  username: yup.string().required(),
+  firstName: yup.string().max(20).required(),
+  lastName: yup.string().max(20).required(),
+  email: yup.string().email().required(),
+  country: yup.string().required('Country is required'),
+  currency: yup.string().required('Currency is required'),
   profile: yup.object().shape({
     id: yup.string(),
-    bio: yup.string(),
-    contact: yup.string(),
+    bio: yup.string().max(500).nullable(),
     avatar: yup
       .object()
       .shape({
@@ -39,6 +43,7 @@ const profileValidationSchema = yup.object().shape({
       .nullable(),
   }),
 });
+
 const ProfilePage: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
   const queryClient = useQueryClient();
@@ -59,6 +64,7 @@ const ProfilePage: NextPageWithLayout = () => {
       queryClient.invalidateQueries(API_ENDPOINTS.USERS_ME);
     },
   });
+
   const onSubmit: SubmitHandler<UpdateProfileInput> = (data) => mutate(data);
 
   return (
@@ -74,9 +80,13 @@ const ProfilePage: NextPageWithLayout = () => {
         useFormProps={{
           defaultValues: pick(me, [
             'id',
-            'name',
+            'username',
+            'firstName',
+            'lastName',
+            'email',
+            'country',
+            'currency',
             'profile.id',
-            'profile.contact',
             'profile.bio',
             'profile.avatar',
           ]),
@@ -84,7 +94,7 @@ const ProfilePage: NextPageWithLayout = () => {
         validationSchema={profileValidationSchema}
         className="flex flex-grow flex-col"
       >
-        {({ register, reset, control, formState: { errors } }) => (
+        {({ register, reset, control, setValue, formState: { errors } }) => (
           <>
             <fieldset className="mb-6 grid gap-5 pb-5 sm:grid-cols-2 md:pb-9 lg:mb-8">
               <Controller
@@ -101,36 +111,42 @@ const ProfilePage: NextPageWithLayout = () => {
                   </div>
                 )}
               />
-              <Input
-                label={t('text-profile-name')}
-                {...register('name')}
-                error={errors.name?.message}
-              />
-              <div>
-                <span className="block cursor-pointer pb-2.5 font-normal text-dark/70 dark:text-light/70">
-                  {t('text-profile-contact')}
-                </span>
-                <Controller
-                  name="profile.contact"
-                  control={control}
-                  render={({ field }) => <ReactPhone country="us" {...field} />}
-                />
-
-                {errors.profile?.contact?.message && (
-                  <span
-                    role="alert"
-                    className="block pt-2 text-xs text-warning"
-                  >
-                    {'contact field is required'}
-                  </span>
-                )}
-              </div>
-              <Textarea
+                     <Textarea
                 label={t('text-profile-bio')}
                 {...register('profile.bio')}
                 error={errors.profile?.bio?.message && 'bio field is required'}
                 className="sm:col-span-2"
               />
+              <Input
+                label="Username"
+                {...register('username')}
+                error={errors.username?.message}
+              />
+              <Input
+                label="First Name"
+                inputClassName="bg-light dark:bg-dark-300"
+                {...register('firstName')}
+                error={errors.firstName?.message}
+              />
+              <Input
+                label="Last Name"
+                inputClassName="bg-light dark:bg-dark-300"
+                {...register('lastName')}
+                error={errors.lastName?.message}
+              />
+              <Input
+                label="Email"
+                inputClassName="bg-light dark:bg-dark-300"
+                type="email"
+                {...register('email')}
+                error={errors.email?.message}
+              />
+              <RegisterLocation
+                onCountrySelect={(country) => setValue('country', country)}
+                setCurrency={(currency) => setValue('currency', currency as string)}
+                error={errors.country?.message}
+              />
+       
             </fieldset>
             <div className="mt-auto flex items-center gap-4 pb-3 lg:justify-end">
               <Button
@@ -138,12 +154,16 @@ const ProfilePage: NextPageWithLayout = () => {
                 onClick={() =>
                   reset({
                     id: me?.id,
-                    name: '',
+                    username: '',
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    country: '',
+                    currency: '',
                     profile: {
                       id: me?.profile?.id,
                       avatar: null,
                       bio: '',
-                      contact: '',
                     },
                   })
                 }
