@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,8 +33,11 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Decoded login request: %+v", request)
 
+	// Convert identifier to lowercase for case-insensitive comparison
+	identifier := strings.ToLower(request.Identifier)
+
 	// Retrieve the user by username or email
-	user, err := db.GetUserByUsernameOrEmail(request.Identifier)
+	user, err := db.GetUserByUsernameOrEmail(identifier)
 	if err != nil {
 		log.Printf("Error retrieving user: %v", err)
 		http.Error(w, "Invalid username/email or password", http.StatusUnauthorized)

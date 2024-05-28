@@ -2,6 +2,7 @@ import type { SearchParamOptions } from '@/types';
 import axios from 'axios';
 import Router from 'next/router';
 import { getAuthToken, removeAuthToken } from './token.utils';
+import { Attachment } from '@/types';
 
 const Axios = axios.create({
   baseURL: process.env.NEXT_PUBLIC_REST_API_ENDPOINT,
@@ -54,6 +55,19 @@ class HttpClient {
     return response.data;
   }
 
+  static async uploadAttachments(files: File[]): Promise<Attachment[]> {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('image', file);
+    });
+
+    const response = await Axios.post<Attachment[]>('/attachments', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
   static async register(userData: { username: string; email: string; password: string }) {
     return this.post('/register', userData);
   }

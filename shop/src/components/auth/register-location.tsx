@@ -3,14 +3,15 @@ import Dropdown from '../ui/create-swap/components/dropdown-container';
 import axios from 'axios';
 
 interface RegisterLocationProps {
+  value?: string;
   onCountrySelect: (country: string) => void;
   setCurrency: React.Dispatch<React.SetStateAction<string>>;
   error?: string;
 }
 
-const RegisterLocation: React.FC<RegisterLocationProps> = ({ onCountrySelect, setCurrency, error }) => {
+const RegisterLocation: React.FC<RegisterLocationProps> = ({ value, onCountrySelect, setCurrency, error }) => {
   const [countries, setCountries] = useState<{ country: string, iso2: string }[]>([]);
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [selectedCountry, setSelectedCountry] = useState<string>(value || '');
 
   useEffect(() => {
     axios.get('https://countriesnow.space/api/v0.1/countries/')
@@ -74,6 +75,7 @@ const RegisterLocation: React.FC<RegisterLocationProps> = ({ onCountrySelect, se
         <Dropdown
           label="Country"
           items={countries.map(country => country.country)}
+          inputValue={selectedCountry}
           onItemSelect={handleCountrySelect}
           {...dropdownStylingProps}
         />

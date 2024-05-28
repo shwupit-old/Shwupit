@@ -1,8 +1,9 @@
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import type { GetStaticProps } from 'next';
 import { useTranslation } from 'next-i18next';
-import type { NextPageWithLayout, UpdateProfileInput } from '@/types';
-import type { SubmitHandler } from 'react-hook-form';
+import type { NextPageWithLayout } from '@/types';
+import { SubmitHandler } from 'react-hook-form';
+import { User, UpdateProfileInput } from '@/types'; 
 import { Controller } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
 import { motion } from 'framer-motion';
@@ -29,19 +30,12 @@ const profileValidationSchema = yup.object().shape({
   email: yup.string().email().required(),
   country: yup.string().required('Country is required'),
   currency: yup.string().required('Currency is required'),
-  profile: yup.object().shape({
-    id: yup.string(),
-    bio: yup.string().max(500).nullable(),
-    avatar: yup
-      .object()
-      .shape({
-        id: yup.string(),
-        thumbnail: yup.string(),
-        original: yup.string(),
-      })
-      .optional()
-      .nullable(),
-  }),
+  bio: yup.string().max(500).nullable(),
+  profilePictureURL: yup.object().shape({
+    id: yup.string().required(),
+    thumbnail: yup.string().required(),
+    original: yup.string().required(),
+  }).nullable(),
 });
 
 const ProfilePage: NextPageWithLayout = () => {
@@ -54,11 +48,16 @@ const ProfilePage: NextPageWithLayout = () => {
         className: '-mt-10 xs:mt-0',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {  // Update to handle error correctly
       toast.error(<b>{t('text-profile-page-error-toast')}</b>, {
         className: '-mt-10 xs:mt-0',
       });
-      console.log(error);
+      console.error('Profile update error:', error);
+      if (error.response?.data?.message) {
+        toast.error(`Error: ${error.response.data.message}`);
+      } else {
+        toast.error('An unexpected error occurred. Please try again.');
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries(API_ENDPOINTS.USERS_ME);
@@ -86,9 +85,8 @@ const ProfilePage: NextPageWithLayout = () => {
             'email',
             'country',
             'currency',
-            'profile.id',
-            'profile.bio',
-            'profile.avatar',
+            'bio',
+            'profilePictureURL',
           ]),
         }}
         validationSchema={profileValidationSchema}
@@ -98,55 +96,53 @@ const ProfilePage: NextPageWithLayout = () => {
           <>
             <fieldset className="mb-6 grid gap-5 pb-5 sm:grid-cols-2 md:pb-9 lg:mb-8">
               <Controller
-                name="profile.avatar"
+                name="profilePictureURL"
                 control={control}
                 render={({ field: { ref, ...rest } }) => (
                   <div className="sm:col-span-2">
                     <span className="block cursor-pointer pb-2.5 font-normal text-dark/70 dark:text-light/70">
-                      {t('text-profile-avatar')}
+                      {t('text-profile-image')}
                     </span>
-                    <div className="text-xs">
-                      <Uploader {...rest} multiple={false} />
-                    </div>
+                    <Uploader {...rest} multiple={false} />
                   </div>
                 )}
               />
-                     <Textarea
+              <Textarea
                 label={t('text-profile-bio')}
-                {...register('profile.bio')}
-                error={errors.profile?.bio?.message && 'bio field is required'}
+                {...register('bio')}
+                error={errors.bio?.message as string | undefined}
                 className="sm:col-span-2"
               />
               <Input
                 label="Username"
                 {...register('username')}
-                error={errors.username?.message}
+                error={errors.username?.message as string | undefined}
               />
               <Input
                 label="First Name"
                 inputClassName="bg-light dark:bg-dark-300"
                 {...register('firstName')}
-                error={errors.firstName?.message}
+                error={errors.firstName?.message as string | undefined}
               />
               <Input
                 label="Last Name"
                 inputClassName="bg-light dark:bg-dark-300"
                 {...register('lastName')}
-                error={errors.lastName?.message}
+                error={errors.lastName?.message as string | undefined}
               />
               <Input
                 label="Email"
                 inputClassName="bg-light dark:bg-dark-300"
                 type="email"
                 {...register('email')}
-                error={errors.email?.message}
+                error={errors.email?.message as string | undefined}
               />
               <RegisterLocation
+                value={me?.country}
                 onCountrySelect={(country) => setValue('country', country)}
                 setCurrency={(currency) => setValue('currency', currency as string)}
-                error={errors.country?.message}
+                error={errors.country?.message as string | undefined}
               />
-       
             </fieldset>
             <div className="mt-auto flex items-center gap-4 pb-3 lg:justify-end">
               <Button
@@ -160,10 +156,11 @@ const ProfilePage: NextPageWithLayout = () => {
                     email: '',
                     country: '',
                     currency: '',
-                    profile: {
-                      id: me?.profile?.id,
-                      avatar: null,
-                      bio: '',
+                    bio: '',
+                    profilePictureURL: {
+                      id: '',
+                      thumbnail: '',
+                      original: '',
                     },
                   })
                 }

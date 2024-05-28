@@ -190,46 +190,38 @@ export interface Shop {
     email: string;
   };
 }
-
+export interface Attachment {
+  id: string;
+  thumbnail: string;
+  original: string;
+  imagePath: string;
+}
 export interface User {
   id: string;
-  name: string;
-  profile: {
-    id: string;
-    bio: string;
-    contact: string;
-    avatar: Attachment;
-  };
-  permissions?: {
-    name: string;
-  }[];
-  wallet?: {
-    available_points: number;
-    created_at: string;
-    customer_id: number;
-    id: number;
-    points_used: number;
-    total_points: number;
-    available_points_to_currency: number;
-    updated_at: string;
-  };
-  role: string;
-  created_at: string;
-  updated_at: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  country: string;
+  profilePictureURL: Attachment;
+  userRating: number;
+  paymentDetails: string;
+  savedItems: string[];
+  currency: string;
+  bio: string;
+  createdAt: string;
+  updatedAt: string;
 }
 export interface UpdateProfileInput {
   id: string;
   username: string;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
   country: string;
+  profilePictureURL: Attachment;
   currency: string;
-  profile: {
-    id?: string;
-    bio?: string;
-    avatar?: Attachment | null;
-  };
+  bio: string;
 }
 export interface ChangePasswordInput {
   oldPassword: string;

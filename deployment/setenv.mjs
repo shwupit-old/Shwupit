@@ -1,114 +1,66 @@
 #!/usr/bin/env zx
 
-// Copyright 2021 Google LLC
+import 'zx/globals';
 
-echo(chalk.green('Started Setup server'))
+echo(chalk.green('Started Setup server'));
 
-echo(chalk.blue('#Step 1 - Installing Nginx'))
-echo('Running: sudo apt update.. ')
-await $`sudo apt update`
+echo(chalk.blue('#Step 1 - Installing Nginx'));
+await $`sudo apt update`;
+await $`sudo apt install -y nginx`;
 
-echo('Running: sudo apt install nginx.. ')
-await $`sudo apt install nginx`
+echo(chalk.blue('#Step 2: Adjusting the Firewall'));
+await $`sudo ufw allow ssh`;
+await $`sudo ufw allow 'Nginx HTTP'`;
+await $`echo "y" | sudo ufw enable`;
+await $`sudo ufw default deny`;
+await $`sudo ufw status`;
 
+echo(chalk.blue('#Step 3 – Checking your Web Server'));
+await $`sudo systemctl status nginx`;
 
-echo(chalk.blue('#Step 2: Adjusting the Firewall'))
-echo('Check ufw app list')
-await $`sudo ufw app list`
+echo(chalk.blue('#Step 9: Setting Up Server & Project'));
+let domainName = "localhost";
+echo(chalk.green(`Using domain name: ${domainName} \n`));
 
-echo('Add ssh to the firewall')
-await $`sudo ufw allow ssh`
-await $`sudo ufw allow OpenSSH`
+await $`sudo rm -f /etc/nginx/sites-enabled/default`;
+await $`sudo rm -f /etc/nginx/sites-available/default`;
+await $`sudo touch /etc/nginx/sites-available/default`;
+await $`sudo chmod -R 777 /etc/nginx/sites-available/default`;
 
-echo('Enable Nginx on the firewall')
-await $`sudo ufw allow 'Nginx HTTP'`
+await $`sudo echo 'server {
+    listen 80;
+    server_name yourdomain.com;
 
-echo('Enable the firewall')
-await $`sudo ufw enable`
-await $`sudo ufw default deny`
+    location /api {
+        proxy_pass http://localhost:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
 
-echo('Check the changes status')
-await $`sudo ufw status`
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
 
+    location ~ ^/uploads/([^/]+)/images/(.*)$ {
+        alias /var/www/html/uploads/$1/images/$2;
+        autoindex on;
+    }
 
-echo(chalk.blue('#Step 3 – Checking your Web Server'))
-echo('Status of the Nginx')
-await $`systemctl status nginx`
+    location ~ /\. {
+        deny all;
+    }
+}' > '/etc/nginx/sites-available/default'`;
 
-echo(chalk.blue('#Step 9: Setting Up Server & Project'))
-let domainName = await question('What is your domain name? ')
-echo(chalk.green(`Your domain name is: ${domainName} \n`))
+await $`sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/`;
+await $`sudo nginx -t`;
+await $`sudo systemctl restart nginx`;
 
-
-await $`sudo rm -f /etc/nginx/sites-enabled/pixer`
-await $`sudo rm -f /etc/nginx/sites-available/pixer`
-await $`sudo touch /etc/nginx/sites-available/pixer`
-await $`sudo chmod -R 777 /etc/nginx/sites-available/pixer`
-
-    echo(chalk.blue('Settings Running For REST API'))
-
-    await $`sudo echo 'server {
-        listen 80;
-
-        server_name ${domainName};
-
-        add_header X-Frame-Options "SAMEORIGIN";
-        add_header X-XSS-Protection "1; mode=block";
-        add_header X-Content-Type-Options "nosniff";
-
-        index index.html index.htm index.php;
-
-        charset utf-8;
-
-        # For API
-        location /api {
-            proxy_pass http://localhost:5000/api;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_cache_bypass $http_upgrade;
-        }
-    
-        # For FrontEnd
-        location /{
-            proxy_pass http://localhost:3000;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_cache_bypass $http_upgrade;
-        }
-    
-        location /admin{
-            proxy_pass http://localhost:3002/admin;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_cache_bypass $http_upgrade;
-        }
-    
-        location ~ /\\.(?!well-known).* {
-            deny all;
-        }
-    }' > '/etc/nginx/sites-available/pixer'`
-
-
-echo(chalk.blue('\nEnabling the config'))
-await $`sudo ln -s /etc/nginx/sites-available/pixer /etc/nginx/sites-enabled/`
-
-//below comment will check nginx error
-await $`sudo nginx -t`
-await $`sudo systemctl restart nginx`
-
-
-echo(chalk.blue('Securing Nginx with Let\'s Encrypt'))
-await $`sudo apt install certbot python3-certbot-nginx`
-await $`sudo ufw status`
-await $`sudo ufw allow 'Nginx Full'`
-await $`sudo ufw delete allow 'Nginx HTTP'`
-await $`sudo ufw status`
-await $`sudo certbot --nginx -d ${domainName}`
-
-echo(chalk.green('Nginx Setup success!'))
+echo(chalk.green('Nginx Setup success!'));

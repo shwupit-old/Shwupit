@@ -311,11 +311,7 @@ class Client {
       HttpClient.get<Settings>(API_ENDPOINTS.SETTINGS, { ...params }),
     contactUs: (input: CreateContactUsInput) =>
       HttpClient.post<any>(API_ENDPOINTS.SETTINGS_CONTACT_US, input),
-    upload: (input: File[]) => {
-      let formData = new FormData();
-      input.forEach((attachment) => {
-        formData.append('attachment[]', attachment);
-      });
+    upload: (formData: FormData) => {
       return HttpClient.post<Attachment[]>(API_ENDPOINTS.UPLOADS, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
