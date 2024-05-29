@@ -30,8 +30,7 @@ import {
 } from '@/lib/constants';
 import { useAtom } from 'jotai';
 import { twMerge } from 'tailwind-merge';
-
-
+import { CartIcon } from '@/components/icons/cart-icon'; // Import CartIcon
 
 interface NavLinkProps {
   href: string;
@@ -39,7 +38,6 @@ interface NavLinkProps {
   icon: React.ReactNode;
   isCollapse?: boolean;
 }
-
 
 function NavLink({ href, icon, title, isCollapse }: NavLinkProps) {
   return (
@@ -68,6 +66,34 @@ function NavLink({ href, icon, title, isCollapse }: NavLinkProps) {
   );
 }
 
+function CartNavLink({ title, isCollapse }: { title: string; isCollapse?: boolean }) {
+  const { openDrawer } = useDrawer();
+
+  return (
+    <div
+      className="my-0.5 flex items-center gap-1 px-4 py-3 cursor-pointer hover:bg-light-300 hover:dark:bg-dark-300 xs:px-6 sm:my-1 sm:gap-1.5 sm:px-7 lg:gap-2 xl:my-0.5"
+      onClick={() => openDrawer('CART_VIEW')}
+    >
+      <span
+        className={cn(
+          'flex flex-shrink-0 items-center justify-start',
+          isCollapse ? 'w-8 xl:w-auto' : 'w-auto xl:w-8'
+        )}
+      >
+        <CartIcon className="h-[18px] w-[18px] text-current" />
+      </span>
+      <span
+        className={cn(
+          'text-dark-100 dark:text-light-400',
+          isCollapse ? 'inline-flex xl:hidden' : 'hidden xl:inline-flex'
+        )}
+      >
+        {title}
+      </span>
+    </div>
+  );
+}
+
 export function Sidebar({
   isCollapse,
   className = 'hidden sm:flex fixed bottom-0 z-20',
@@ -82,35 +108,31 @@ export function Sidebar({
   const { resolvedTheme, setTheme, systemTheme } = useTheme();
   const [isClient, setIsClient] = useState(false);
 
-
-
   useEffect(() => {
-    // Mark that we are now on the client and can access themes safely
     setIsClient(true);
   }, []);
 
   const isDarkMode = isClient ? resolvedTheme === 'dark' : systemTheme === 'dark';
   const themeSwitchText = isDarkMode ? t('text-theme-light') : t('text-theme-dark');
 
-  
-  
-const toggleTheme = () => {
-  setTheme(isDarkMode ? 'light' : 'dark');
-};
-return (
-  <aside
-    className={twMerge(
-      cn(
-        'h-full flex-col justify-between overflow-y-auto border-r border-light-400 bg-light-100 text-dark-900 dark:border-0 dark:bg-dark-200',
-        'pt-4',
-        isCollapse ? 'sm:w-60 xl:w-[75px]' : 'sm:w-[75px] xl:w-60',
-        width >= RESPONSIVE_WIDTH && underMaintenanceIsComing && !isScrolling
-          ? 'md:pt-[9.625rem]'  
-          : 'md:pt-20', 
-        className
-      )
-    )}
-  >
+  const toggleTheme = () => {
+    setTheme(isDarkMode ? 'light' : 'dark');
+  };
+
+  return (
+    <aside
+      className={twMerge(
+        cn(
+          'h-full flex-col justify-between overflow-y-auto border-r border-light-400 bg-light-100 text-dark-900 dark:border-0 dark:bg-dark-200',
+          'pt-4',
+          isCollapse ? 'sm:w-60 xl:w-[75px]' : 'sm:w-[75px] xl:w-60',
+          width >= RESPONSIVE_WIDTH && underMaintenanceIsComing && !isScrolling
+            ? 'md:pt-[9.625rem]'  
+            : 'md:pt-20', 
+          className
+        )
+      )}
+    >
       <Scrollbar className="relative h-full w-full">
         <div className="flex h-full w-full flex-col">
           <nav className="flex flex-col">
@@ -120,14 +142,6 @@ return (
               isCollapse={isCollapse}
               icon={<HomeIcon className="h-[18px] w-[18px] text-current" />}
             /> 
-            
-
-            {/* <NavLink
-              title={t('text-top-authors')}
-              href={routes.authors}
-              isCollapse={isCollapse}
-              icon={<PeopleIcon className="h-[18px] w-[18px] text-current" />}
-            /> */}
 
             <NavLink
               title={t('text-my-swaps')}
@@ -136,41 +150,14 @@ return (
               icon={<SwapIcon className="h-[17px] w-[17px] text-current" />}
             />
 
+            <CartNavLink title={t('text-saved-items')} isCollapse={isCollapse} />
+
             <NavLink
-              title={t('text-messages')}
-              href={routes.messages}
-              isCollapse={isCollapse}
-              icon={
-                <PaperPlaneIcon className="h-[18px] w-[18px] text-current" />
-              }
-            />
-             <NavLink
               title={t('text-disputes')}
               href={routes.contact}
               isCollapse={isCollapse}
-              icon={
-                <ExclamationCircleIcon className="h-[18px] w-[18px] text-current" />
-              }
+              icon={<ExclamationCircleIcon className="h-[18px] w-[18px] text-current" />}
             />
-      {/* <div
-  className="my-0.5 flex items-center gap-1 px-4 py-3 hover:bg-light-300 hover:dark:bg-dark-300 xs:px-6 sm:my-1 sm:gap-1.5 sm:px-7 lg:gap-2 xl:my-0.5 cursor-pointer"
-  onClick={toggleTheme}
->
-  {isDarkMode ? (
-    <ThemeLightIcon className="h-5 w-5" />
-  ) : (
-    <ThemeDarkIcon className="h-[19px] w-[19px]" />
-  )}
-  <span
-    className={cn(
-      'ml-2 text-dark-100 dark:text-light-400',
-      isCollapse ? 'inline-flex xl:hidden' : 'hidden xl:inline-flex'
-    )}
-  >
-    {themeSwitchText}
-  </span>
-</div> */}
-
           </nav>
 
           <nav className="mt-auto flex flex-col pb-4">
@@ -186,7 +173,6 @@ return (
               isCollapse={isCollapse}
               icon={<HelpIcon className="h-[18px] w-[18px] text-current" />}
             />
-            
           </nav>
         </div>
       </Scrollbar>
