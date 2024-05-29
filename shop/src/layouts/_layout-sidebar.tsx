@@ -4,26 +4,21 @@ import { DiscoverIcon } from '@/components/icons/discover-icon';
 import { SwapIcon } from '@/components/icons/swap-icon';
 import { HelpIcon } from '@/components/icons/help-icon';
 import { HomeIcon } from '@/components/icons/home-icon';
-import { PaperPlaneIcon } from '@/components/icons/paper-plane-icon';
+import ChatIcon from '@/components/icons/chat-icon';
 import { ExclamationCircleIcon } from '@/components/icons/exclamation-circle-icon';
 import { PeopleIcon } from '@/components/icons/people-icon';
-import { ProductIcon } from '@/components/icons/product-icon';
 import { SettingIcon } from '@/components/icons/setting-icon';
 import ActiveLink from '@/components/ui/links/active-link';
-import { ThemeLightIcon } from '@/components/icons/theme-light-icon';
-import { ThemeDarkIcon } from '@/components/icons/theme-dark-icon';
 import Logo from '@/components/ui/logo';
 import Scrollbar from '@/components/ui/scrollbar';
 import routes from '@/config/routes';
 import Copyright from '@/layouts/_copyright';
 import cn from 'classnames';
-import ThemeSwitcher from '@/components/ui/theme-switcher';
 import { useTranslation } from 'next-i18next';
 import { useTheme } from 'next-themes';
 import { useWindowSize } from 'react-use';
 import { useState, useEffect } from 'react';
 import {
-  isMultiLangEnable,
   checkIsMaintenanceModeComing,
   checkIsScrollingStart,
   RESPONSIVE_WIDTH,
@@ -105,19 +100,16 @@ export function Sidebar({
   const { width } = useWindowSize();
   const [underMaintenanceIsComing] = useAtom(checkIsMaintenanceModeComing);
   const [isScrolling] = useAtom(checkIsScrollingStart);
-  const { resolvedTheme, setTheme, systemTheme } = useTheme();
+  const { setTheme } = useTheme();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // Mark that we are now on the client and can access themes safely
     setIsClient(true);
-  }, []);
 
-  const isDarkMode = isClient ? resolvedTheme === 'dark' : systemTheme === 'dark';
-  const themeSwitchText = isDarkMode ? t('text-theme-light') : t('text-theme-dark');
-
-  const toggleTheme = () => {
-    setTheme(isDarkMode ? 'light' : 'dark');
-  };
+    // Set the default theme to light
+    setTheme('light');
+  }, [setTheme]);
 
   return (
     <aside
@@ -127,8 +119,8 @@ export function Sidebar({
           'pt-4',
           isCollapse ? 'sm:w-60 xl:w-[75px]' : 'sm:w-[75px] xl:w-60',
           width >= RESPONSIVE_WIDTH && underMaintenanceIsComing && !isScrolling
-            ? 'md:pt-[9.625rem]'  
-            : 'md:pt-20', 
+            ? 'md:pt-[9.625rem]'
+            : 'md:pt-20',
           className
         )
       )}
@@ -141,17 +133,23 @@ export function Sidebar({
               href={routes.home}
               isCollapse={isCollapse}
               icon={<HomeIcon className="h-[18px] w-[18px] text-current" />}
-            /> 
-
+            />
             <NavLink
               title={t('text-my-swaps')}
               href={routes.mySwaps}
               isCollapse={isCollapse}
               icon={<SwapIcon className="h-[17px] w-[17px] text-current" />}
             />
-
-            <CartNavLink title={t('text-saved-items')} isCollapse={isCollapse} />
-
+            {width >= RESPONSIVE_WIDTH ? (
+              <NavLink
+                title={t('text-messages')}
+                href={routes.messages}
+                isCollapse={isCollapse}
+                icon={<ChatIcon className="h-[18px] w-[18px] text-current" />}
+              />
+            ) : (
+              <CartNavLink title={t('text-saved-items')} isCollapse={isCollapse} />
+            )}
             <NavLink
               title={t('text-disputes')}
               href={routes.contact}
@@ -159,7 +157,6 @@ export function Sidebar({
               icon={<ExclamationCircleIcon className="h-[18px] w-[18px] text-current" />}
             />
           </nav>
-
           <nav className="mt-auto flex flex-col pb-4">
             <NavLink
               title={t('text-settings')}
@@ -176,7 +173,6 @@ export function Sidebar({
           </nav>
         </div>
       </Scrollbar>
-
       <footer
         className={cn(
           'flex-col border-t border-light-400 pt-3 pb-4 text-center dark:border-dark-400',
