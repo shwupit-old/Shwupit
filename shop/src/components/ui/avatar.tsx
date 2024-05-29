@@ -28,8 +28,8 @@ const classes = {
 
 type AvatarProps = {
   src?: string;
-  name: string;
-  initials?: string;
+  firstName: string;
+  lastName: string;
   size?: keyof typeof classes.size;
   customSize?: string;
   rounded?: keyof typeof classes.rounded;
@@ -39,18 +39,18 @@ type AvatarProps = {
 
 const CHECK_VALID_CUSTOM_SIZE = /(\d*px)?/g;
 
-function getInitials(name: string) {
-  if (!name) return 'GU';
-  const words = name.split(' ');
-  const initials = words.map((word) => word[0]);
-  return initials.slice(0, 2).join('').toUpperCase();
+function getInitials(firstName: string, lastName: string) {
+  if (!firstName && !lastName) return 'GU';
+  const firstInitial = firstName ? firstName[0] : '';
+  const lastInitial = lastName ? lastName[0] : '';
+  return (firstInitial + lastInitial).toUpperCase();
 }
 
 const Avatar: React.FC<AvatarProps> = ({
   src,
-  name,
+  firstName,
+  lastName,
   size = 'DEFAULT',
-  initials,
   customSize,
   rounded = 'full',
   onClick,
@@ -89,7 +89,7 @@ const Avatar: React.FC<AvatarProps> = ({
         {...rest}
       >
         <Image
-          alt={name}
+          alt={`${firstName} ${lastName}`}
           src={src}
           fill
           priority={true}
@@ -101,7 +101,7 @@ const Avatar: React.FC<AvatarProps> = ({
   }
   return (
     <span
-      title={name}
+      title={`${firstName} ${lastName}`}
       className={twMerge(
         cn(
           classes.base,
@@ -118,7 +118,7 @@ const Avatar: React.FC<AvatarProps> = ({
       }}
       onClick={onClick}
     >
-      {initials || getInitials(name)}
+      {getInitials(firstName, lastName)}
     </span>
   );
 };

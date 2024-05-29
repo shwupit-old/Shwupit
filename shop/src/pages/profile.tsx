@@ -111,30 +111,30 @@ const ProfilePage: NextPageWithLayout = () => {
                 label={t('text-profile-bio')}
                 {...register('bio')}
                 error={errors.bio?.message as string | undefined}
-                className="sm:col-span-2"
+                className="sm:col-span-2 rounded-none"
               />
               <Input
                 label="Username"
-                {...register('username')}
+                value={me?.username}
                 error={errors.username?.message as string | undefined}
               />
               <Input
                 label="First Name"
                 inputClassName="bg-light dark:bg-dark-300"
-                {...register('firstName')}
+                value={me?.firstName}
                 error={errors.firstName?.message as string | undefined}
               />
               <Input
                 label="Last Name"
                 inputClassName="bg-light dark:bg-dark-300"
-                {...register('lastName')}
+                value={me?.lastName}
                 error={errors.lastName?.message as string | undefined}
               />
               <Input
                 label="Email"
                 inputClassName="bg-light dark:bg-dark-300"
                 type="email"
-                {...register('email')}
+                value={me?.email}
                 error={errors.email?.message as string | undefined}
               />
               <RegisterLocation
