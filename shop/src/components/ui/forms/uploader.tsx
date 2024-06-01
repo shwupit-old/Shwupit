@@ -3,12 +3,12 @@ import cn from 'classnames';
 import { useCallback, useEffect, useState } from 'react';
 import { useDropzone, Accept } from 'react-dropzone';
 import { useMutation } from 'react-query';
-import Image from '@/components/ui/image';
+import { HttpClient } from '@/data/client/http-client';
+import Image from 'next/image';
 import { CloseIcon } from '@/components/icons/close-icon';
 import Button from '@/components/ui/button';
 import { SpinnerIcon } from '@/components/icons/spinner-icon';
 import { PlusIcon } from '@/components/icons/plus-icon';
-import { HttpClient } from '@/data/client/http-client';
 import toast from 'react-hot-toast';
 
 function getDefaultValues(attachment: Attachment[] | null) {
@@ -22,19 +22,18 @@ export default function Uploader({
   name,
   onBlur,
   multiple = true,
+  removeImage,
 }: any) {
-  const [attachments, setAttachments] = useState<Attachment[] | null>(
-    getDefaultValues(value)
-  );
+  const [attachments, setAttachments] = useState<Attachment[] | null>(getDefaultValues(value));
 
   useEffect(() => {
     setAttachments(getDefaultValues(value));
+    console.log('Uploader value updated:', value);
   }, [value]);
 
   const { mutate, isLoading } = useMutation(
     async (files: File[]) => {
       const response = await HttpClient.uploadAttachments(files);
-      console.log('Upload response:', response); // Check this log
       return response.map((file) => ({
         ...file,
         original: file.imagePath,
@@ -42,9 +41,10 @@ export default function Uploader({
     },
     {
       onSuccess: (response) => {
-        const data = multiple ? response : response[0];
+        const data = multiple ? response : [response[0]];
+        console.log('Uploaded data:', data);
         onChange(data);
-        setAttachments(response);
+        setAttachments(data);
       },
       onError: (error) => {
         console.error(error);
@@ -53,12 +53,10 @@ export default function Uploader({
     }
   );
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      mutate(acceptedFiles);
-    },
-    [mutate]
-  );
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    console.log('Files dropped:', acceptedFiles);
+    mutate(acceptedFiles);
+  }, [mutate]);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: { 'image/*': [] } as Accept,
@@ -69,14 +67,9 @@ export default function Uploader({
   function remove(id: string) {
     if (!attachments) return;
     const newAttachments = attachments.filter((attachment) => attachment.id !== id);
-    if (!newAttachments.length) {
-      setAttachments(null);
-      onChange(null);
-      return;
-    }
-    setAttachments(newAttachments);
-    const data = multiple ? newAttachments : newAttachments[0];
-    onChange(data);
+    setAttachments(newAttachments.length ? newAttachments : null);
+    onChange(newAttachments.length ? newAttachments : null);
+    removeImage();
   }
 
   return (
@@ -92,19 +85,14 @@ export default function Uploader({
           ),
         })}
       >
-        <input
-          {...getInputProps({
-            name,
-            onBlur,
-          })}
-        />
+        <input {...getInputProps({ name, onBlur })} />
         {multiple !== true
-          ? Array.isArray(attachments)
-            ? attachments.map(({ id, original }) => (
-                <div key={id}>
+          ? Array.isArray(attachments) && attachments.length > 0
+            ? attachments.map(({ id, original }, index) => (
+                <div key={id || index}>
                   <div className="relative h-20 w-20 overflow-hidden rounded-full">
                     {original ? (
-                      <img alt="Avatar" src={original} className="object-scale-down" />
+                      <Image alt="Avatar" src={original} className="object-scale-down" fill />
                     ) : (
                       'Upload Your Profile Picture'
                     )}
@@ -112,7 +100,7 @@ export default function Uploader({
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      remove(id);
+                      remove(id || index.toString());
                     }}
                     variant="icon"
                     className="absolute right-0 top-0 p-3"
@@ -131,11 +119,11 @@ export default function Uploader({
       </div>
       {Array.isArray(attachments) &&
         multiple === true &&
-        attachments.map(({ id, original }) => (
-          <div key={id} className="group relative h-20 w-20 overflow-hidden rounded-md">
+        attachments.map(({ id, original }, index) => (
+          <div key={id || index} className="group relative h-20 w-20 overflow-hidden rounded-md">
             <div className="relative h-full w-full overflow-hidden rounded-md">
               {original ? (
-                <img alt="Attachment" src={original} className="object-cover" />
+                <Image alt="Attachment" src={original} className="object-cover" fill />
               ) : (
                 <div className="bg-gray-200 h-full w-full flex items-center justify-center">
                   <span className="text-gray-500">No Image</span>

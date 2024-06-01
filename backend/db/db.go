@@ -22,10 +22,10 @@ func init() {
 
 func InsertUser(user model.User) error {
 	query := `INSERT INTO users (
-		user_id, username, email, password_hash, first_name, last_name, country, 
-		profile_picture_url, user_rating, payment_details, created_at, updated_at, 
-		saved_items, currency, bio
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+			user_id, username, email, password_hash, first_name, last_name, country, 
+			profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+			saved_items, currency, bio
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	err := session.Query(query,
 		user.ID,
@@ -52,14 +52,37 @@ func InsertUser(user model.User) error {
 	return nil
 }
 
+func UpdateUser(user *model.User) error {
+	query := `UPDATE users SET username=?, email=?, first_name=?, last_name=?, country=?, profile_picture_url=?, user_rating=?, payment_details=?, created_at=?, updated_at=?, saved_items=?, currency=?, bio=? WHERE user_id=?`
+	if err := session.Query(query,
+		user.Username,
+		user.Email,
+		user.FirstName,
+		user.LastName,
+		user.Country,
+		user.ProfilePictureURL,
+		user.UserRating,
+		user.PaymentDetails,
+		user.CreatedAt,
+		user.UpdatedAt,
+		user.SavedItems,
+		user.Currency,
+		user.Bio,
+		user.ID).Exec(); err != nil {
+		log.Printf("Failed to update user: %v", err)
+		return err
+	}
+	return nil
+}
+
 func GetUserByUsernameOrEmail(identifier string) (model.User, error) {
 	var user model.User
 
 	// Try to get the user by username first
 	queryUsername := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
-		profile_picture_url, user_rating, payment_details, created_at, updated_at, 
-		saved_items, currency, bio 
-		FROM users WHERE username = ? LIMIT 1`
+			profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+			saved_items, currency, bio 
+			FROM users WHERE username = ? LIMIT 1`
 
 	err := session.Query(queryUsername, identifier).Consistency(gocql.One).Scan(
 		&user.ID, &user.Username, &user.Email, &user.PasswordHash,
@@ -77,9 +100,9 @@ func GetUserByUsernameOrEmail(identifier string) (model.User, error) {
 	// If no user is found by username, try to get the user by email
 	if err == gocql.ErrNotFound {
 		queryEmail := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
-			profile_picture_url, user_rating, payment_details, created_at, updated_at, 
-			saved_items, currency, bio 
-			FROM users WHERE email = ? LIMIT 1`
+				profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+				saved_items, currency, bio 
+				FROM users WHERE email = ? LIMIT 1`
 
 		err = session.Query(queryEmail, identifier).Consistency(gocql.One).Scan(
 			&user.ID, &user.Username, &user.Email, &user.PasswordHash,
@@ -100,9 +123,9 @@ func GetUserByUsernameOrEmail(identifier string) (model.User, error) {
 func GetUserByUsername(username string) (model.User, error) {
 	var user model.User
 	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
-            profile_picture_url, user_rating, payment_details, created_at, updated_at, 
-            saved_items, currency, bio 
-            FROM users WHERE username = ? LIMIT 1`
+				profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+				saved_items, currency, bio 
+				FROM users WHERE username = ? LIMIT 1`
 	err := session.Query(cql, username).Scan(
 		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
 		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
@@ -117,9 +140,9 @@ func GetUserByUsername(username string) (model.User, error) {
 func GetUserByEmail(email string) (model.User, error) {
 	var user model.User
 	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
-            profile_picture_url, user_rating, payment_details, created_at, updated_at, 
-            saved_items, currency, bio 
-            FROM users WHERE email = ? LIMIT 1`
+				profile_picture_url, user_rating, payment_details, created_at, updated_at, 
+				saved_items, currency, bio 
+				FROM users WHERE email = ? LIMIT 1`
 	err := session.Query(cql, email).Scan(
 		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
 		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
@@ -131,18 +154,29 @@ func GetUserByEmail(email string) (model.User, error) {
 	return user, err
 }
 
-func GetUserByID(userID gocql.UUID) (model.User, error) {
+func GetUserByID(id gocql.UUID) (model.User, error) {
 	var user model.User
-	cql := `SELECT user_id, username, email, password_hash, first_name, last_name, country, 
-			profile_picture_url, user_rating, payment_details, created_at, updated_at, 
-			saved_items, currency, bio 
-			FROM users WHERE user_id = ? LIMIT 1`
-	err := session.Query(cql, userID).Consistency(gocql.One).Scan(
-		&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
-		&user.Country, &user.ProfilePictureURL, &user.UserRating, &user.PaymentDetails,
-		&user.CreatedAt, &user.UpdatedAt, &user.SavedItems, &user.Currency, &user.Bio,
-	)
-	return user, err
+	query := "SELECT user_id, username, email, first_name, last_name, country, profile_picture_url, user_rating, payment_details, created_at, updated_at, saved_items, currency, bio FROM users WHERE user_id=?"
+	if err := session.Query(query, id).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.FirstName,
+		&user.LastName,
+		&user.Country,
+		&user.ProfilePictureURL,
+		&user.UserRating,
+		&user.PaymentDetails,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.SavedItems,
+		&user.Currency,
+		&user.Bio,
+	); err != nil {
+		log.Printf("Failed to get user by ID: %v", err)
+		return user, err
+	}
+	return user, nil
 }
 
 func InsertItem(item model.Item) error {

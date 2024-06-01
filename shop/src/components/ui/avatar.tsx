@@ -41,9 +41,8 @@ const CHECK_VALID_CUSTOM_SIZE = /(\d*px)?/g;
 
 function getInitials(firstName: string, lastName: string) {
   if (!firstName && !lastName) return 'GU';
-  const firstInitial = firstName ? firstName[0] : '';
-  const lastInitial = lastName ? lastName[0] : '';
-  return (firstInitial + lastInitial).toUpperCase();
+  const initials = (firstName[0] || '') + (lastName[0] || '');
+  return initials.toUpperCase();
 }
 
 const Avatar: React.FC<AvatarProps> = ({
@@ -92,8 +91,8 @@ const Avatar: React.FC<AvatarProps> = ({
           alt={`${firstName} ${lastName}`}
           src={src}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add the sizes prop for performance improvement
           priority={true}
-          sizes="(max-width: 768px) 100vw"
           onError={() => setError(() => true)}
         />
       </div>

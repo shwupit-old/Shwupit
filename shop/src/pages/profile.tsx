@@ -1,9 +1,10 @@
+import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import type { GetStaticProps } from 'next';
 import { useTranslation } from 'next-i18next';
-import type { NextPageWithLayout } from '@/types';
+import type { Attachment, NextPageWithLayout } from '@/types';
 import { SubmitHandler } from 'react-hook-form';
-import { User, UpdateProfileInput } from '@/types'; 
+import { User, UpdateUserInput } from '@/types';
 import { Controller } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
 import { motion } from 'framer-motion';
@@ -31,24 +32,21 @@ const profileValidationSchema = yup.object().shape({
   country: yup.string().required('Country is required'),
   currency: yup.string().required('Currency is required'),
   bio: yup.string().max(500).nullable(),
-  profilePictureURL: yup.object().shape({
-    id: yup.string().required(),
-    thumbnail: yup.string().required(),
-    original: yup.string().required(),
-  }).nullable(),
+  profilePictureURL: yup.string().nullable(),
 });
 
 const ProfilePage: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
   const queryClient = useQueryClient();
   const { me } = useMe();
+  const router = useRouter();
   const { mutate, isLoading } = useMutation(client.users.update, {
     onSuccess: () => {
       toast.success(<b>{t('text-profile-page-success-toast')}</b>, {
         className: '-mt-10 xs:mt-0',
       });
     },
-    onError: (error: any) => {  // Update to handle error correctly
+    onError: (error: any) => {
       toast.error(<b>{t('text-profile-page-error-toast')}</b>, {
         className: '-mt-10 xs:mt-0',
       });
@@ -64,17 +62,24 @@ const ProfilePage: NextPageWithLayout = () => {
     },
   });
 
-  const onSubmit: SubmitHandler<UpdateProfileInput> = (data) => mutate(data);
+  const onSubmit: SubmitHandler<UpdateUserInput> = (data) => {
+    console.log('Submitting user data:', data);
+
+    if (data.profilePictureURL) {
+      console.log('Profile Picture URL:', data.profilePictureURL);
+    } else {
+      console.log('No Profile Picture URL provided.');
+    }
+
+    mutate(data);
+  };
 
   return (
-    <motion.div
-      variants={fadeInBottom()}
-      className="flex min-h-full flex-grow flex-col"
-    >
+    <motion.div variants={fadeInBottom()} className="flex min-h-full flex-grow flex-col">
       <h1 className="mb-5 text-15px font-medium text-dark dark:text-light sm:mb-6">
         {t('text-profile-page-title')}
       </h1>
-      <Form<UpdateProfileInput>
+      <Form<UpdateUserInput>
         onSubmit={onSubmit}
         useFormProps={{
           defaultValues: pick(me, [
@@ -103,7 +108,21 @@ const ProfilePage: NextPageWithLayout = () => {
                     <span className="block cursor-pointer pb-2.5 font-normal text-dark/70 dark:text-light/70">
                       {t('text-profile-image')}
                     </span>
-                    <Uploader {...rest} multiple={false} />
+                    <div className="text-xs">
+                      <Uploader
+                        onChange={(data: Attachment[] | null) => {
+                          console.log('Uploader onChange data:', data);
+                          if (data && data.length > 0) {
+                            setValue('profilePictureURL', data[0].original);
+                          } else {
+                            setValue('profilePictureURL', '');
+                          }
+                        }}
+                        value={me?.profilePictureURL ? [{ original: me.profilePictureURL }] : []}
+                        multiple={false}
+                        removeImage={() => setValue('profilePictureURL', '')}
+                      />
+                    </div>
                   </div>
                 )}
               />
@@ -111,70 +130,65 @@ const ProfilePage: NextPageWithLayout = () => {
                 label={t('text-profile-bio')}
                 {...register('bio')}
                 error={errors.bio?.message as string | undefined}
-                className="sm:col-span-2 rounded-none"
+                className="sm:col-span-2"
               />
               <Input
                 label="Username"
-                value={me?.username}
+                {...register('username')}
                 error={errors.username?.message as string | undefined}
               />
               <Input
                 label="First Name"
                 inputClassName="bg-light dark:bg-dark-300"
-                value={me?.firstName}
+                {...register('firstName')}
                 error={errors.firstName?.message as string | undefined}
               />
               <Input
                 label="Last Name"
                 inputClassName="bg-light dark:bg-dark-300"
-                value={me?.lastName}
+                {...register('lastName')}
                 error={errors.lastName?.message as string | undefined}
               />
               <Input
                 label="Email"
                 inputClassName="bg-light dark:bg-dark-300"
                 type="email"
-                value={me?.email}
+                {...register('email')}
                 error={errors.email?.message as string | undefined}
               />
               <RegisterLocation
                 value={me?.country}
                 onCountrySelect={(country) => setValue('country', country)}
-                setCurrency={(currency) => setValue('currency', currency as string)}
+                setCurrency={(currency) =>
+                  setValue('currency', currency as string)
+                }
                 error={errors.country?.message as string | undefined}
               />
             </fieldset>
             <div className="mt-auto flex items-center gap-4 pb-3 lg:justify-end">
               <Button
                 type="reset"
-                onClick={() =>
+                onClick={() => {
                   reset({
                     id: me?.id,
-                    username: '',
-                    firstName: '',
-                    lastName: '',
-                    email: '',
-                    country: '',
-                    currency: '',
-                    bio: '',
-                    profilePictureURL: {
-                      id: '',
-                      thumbnail: '',
-                      original: '',
-                    },
-                  })
-                }
+                    username: me?.username,
+                    firstName: me?.firstName,
+                    lastName: me?.lastName,
+                    email: me?.email,
+                    country: me?.country,
+                    currency: me?.currency,
+                    bio: me?.bio,
+                    profilePictureURL: me?.profilePictureURL,
+                  });
+                  router.push('/');
+                }}
                 disabled={isLoading}
                 variant="outline"
                 className="flex-1 lg:flex-none"
               >
                 {t('text-cancel')}
               </Button>
-              <Button
-                className="flex-1 lg:flex-none"
-                isLoading={isLoading}
-                disabled={isLoading}
-              >
+              <Button className="flex-1 lg:flex-none" isLoading={isLoading} disabled={isLoading}>
                 {t('text-save-changes')}
               </Button>
             </div>

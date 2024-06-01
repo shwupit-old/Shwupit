@@ -1,17 +1,16 @@
-import type { SearchParamOptions } from '@/types';
+import type { SearchParamOptions, Attachment } from '@/types';
 import axios from 'axios';
 import Router from 'next/router';
 import { getAuthToken, removeAuthToken } from './token.utils';
-import { Attachment } from '@/types';
 
 const Axios = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_REST_API_ENDPOINT,
+  baseURL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
+    'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
 });
-
 Axios.interceptors.request.use(
   (config) => {
     const token = getAuthToken();
@@ -20,7 +19,10 @@ Axios.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('Request error:', error);
+    return Promise.reject(error);
+  }
 );
 
 Axios.interceptors.response.use(
@@ -30,29 +32,50 @@ Axios.interceptors.response.use(
       removeAuthToken();
       Router.reload();
     }
+    console.error('Response error:', error);
     return Promise.reject(error);
   }
 );
 
 class HttpClient {
   static async get<T>(url: string, params?: unknown): Promise<T> {
-    const response = await Axios.get<T>(url, { params });
-    return response.data;
+    try {
+      const response = await Axios.get<T>(url, { params });
+      return response.data;
+    } catch (error) {
+      console.error('GET request error:', error);
+      throw error;
+    }
   }
 
   static async post<T>(url: string, data: unknown, options?: any): Promise<T> {
-    const response = await Axios.post<T>(url, data, options);
-    return response.data;
+    try {
+      const response = await Axios.post<T>(url, data, options);
+      return response.data;
+    } catch (error) {
+      console.error('POST request error:', error);
+      throw error;
+    }
   }
 
   static async put<T>(url: string, data: unknown): Promise<T> {
-    const response = await Axios.put<T>(url, data);
-    return response.data;
+    try {
+      const response = await Axios.put<T>(url, data);
+      return response.data;
+    } catch (error) {
+      console.error('PUT request error:', error);
+      throw error;
+    }
   }
 
   static async delete<T>(url: string): Promise<T> {
-    const response = await Axios.delete<T>(url);
-    return response.data;
+    try {
+      const response = await Axios.delete<T>(url);
+      return response.data;
+    } catch (error) {
+      console.error('DELETE request error:', error);
+      throw error;
+    }
   }
 
   static async uploadAttachments(files: File[]): Promise<Attachment[]> {
@@ -61,13 +84,19 @@ class HttpClient {
       formData.append('image', file);
     });
 
-    const response = await Axios.post<Attachment[]>('/attachments', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    try {
+      const response = await Axios.post<Attachment[]>('/attachments', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('File upload error:', error);
+      throw error;
+    }
   }
+
   static async register(userData: { username: string; email: string; password: string }) {
     return this.post('/register', userData);
   }

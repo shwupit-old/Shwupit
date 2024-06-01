@@ -1,5 +1,6 @@
 import type { NextPage } from 'next';
 import type { ReactElement, ReactNode } from 'react';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export interface QueryOptions {
   page?: number;
@@ -153,12 +154,7 @@ export interface Location {
   formattedAddress: string;
 }
 
-export interface Attachment {
-  id: string;
-  original: string;
-  thumbnail: string;
-  __typename?: string;
-}
+
 
 export interface Shop {
   id: string;
@@ -196,6 +192,7 @@ export interface Attachment {
   original: string;
   imagePath: string;
 }
+
 export interface User {
   id: string;
   username: string;
@@ -203,7 +200,7 @@ export interface User {
   firstName: string;
   lastName: string;
   country: string;
-  profilePictureURL: Attachment;
+  profilePictureURL: string | Attachment;
   userRating: number;
   paymentDetails: string;
   savedItems: string[];
@@ -212,14 +209,15 @@ export interface User {
   createdAt: string;
   updatedAt: string;
 }
-export interface UpdateProfileInput {
+
+export interface UpdateUserInput {
   id: string;
   username: string;
   email: string;
   firstName: string;
   lastName: string;
   country: string;
-  profilePictureURL: Attachment;
+  profilePictureURL: string | Attachment;
   currency: string;
   bio: string;
 }
@@ -276,6 +274,52 @@ export interface AuthResponse {
   permissions: string[];
 }
 
+export interface UpdateUserInput {
+  id: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  country: string;
+  profilePictureURL: string | Attachment;
+  currency: string;
+  bio: string;
+}
+
+export const mapSupabaseUserToUser = (supabaseUser: SupabaseUser | null): User => {
+  if (!supabaseUser) {
+    throw new Error('User not found');
+  }
+
+  return {
+    id: supabaseUser.id || '',
+    email: supabaseUser.email || '',
+    username: supabaseUser.user_metadata?.username || '',
+    firstName: supabaseUser.user_metadata?.firstName || '',
+    lastName: supabaseUser.user_metadata?.lastName || '',
+    country: supabaseUser.user_metadata?.country || '',
+    profilePictureURL: supabaseUser.user_metadata?.profilePictureURL || '',
+    userRating: supabaseUser.user_metadata?.userRating || 0,
+    paymentDetails: supabaseUser.user_metadata?.paymentDetails || '',
+    savedItems: supabaseUser.user_metadata?.savedItems || [],
+    currency: supabaseUser.user_metadata?.currency || '',
+    bio: supabaseUser.user_metadata?.bio || '',
+    createdAt: supabaseUser.created_at || '',
+    updatedAt: supabaseUser.updated_at || '',
+  };
+};
+
+export interface Attachment {
+  id: string;
+  thumbnail: string;
+  original: string;
+  imagePath: string;
+}
+
+export interface ChangePasswordInput {
+  oldPassword: string;
+  newPassword: string;
+}
 export interface CreateContactUsInput {
   name: string;
   email: string;
@@ -606,6 +650,7 @@ export interface FAQS {
 }
 
 export interface TagPaginator extends PaginatorInfo<Tag> {}
+
 
 export interface OrderPaginator extends PaginatorInfo<Order> {}
 

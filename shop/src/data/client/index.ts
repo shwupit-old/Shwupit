@@ -53,8 +53,8 @@ import type {
   TopShopQueryOptions,
   Type,
   TypeQueryOptions,
-  UpdateProfileInput,
   UpdateReviewInput,
+  UpdateUserInput,
   User,
   VerifiedCheckoutResponse,
   VerifyForgetPasswordTokenInput,
@@ -64,6 +64,10 @@ import type {
 import { FollowedShopsQueryOptions } from '@/types';
 import { API_ENDPOINTS } from './endpoints';
 import { HttpClient } from './http-client';
+import { supabase } from '../utils/supabaseClient';
+import {mapSupabaseUserToUser} from '@/types/index'
+import { createClient } from '@supabase/supabase-js';
+
 
 class Client {
   products = {
@@ -105,36 +109,40 @@ class Client {
     download: (input: { product_id: string }) =>
       HttpClient.post<string>(API_ENDPOINTS.PRODUCTS_FREE_DOWNLOAD, input),
   };
+  
   categories = {
     all: (query?: CategoryQueryOptions) =>
       HttpClient.get<CategoryPaginator>(API_ENDPOINTS.CATEGORIES, { ...query }),
   };
+
   tags = {
     all: (query?: QueryOptions) =>
       HttpClient.get<TagPaginator>(API_ENDPOINTS.TAGS, query),
     get: ({ slug, language }: { slug: string; language?: string }) =>
       HttpClient.get<Tag>(`${API_ENDPOINTS.TAGS}/${slug}`, { language }),
   };
+
   types = {
     all: (query?: TypeQueryOptions) =>
       HttpClient.get<Type[]>(API_ENDPOINTS.TYPES, { ...query }),
   };
+
   shops = {
     all: (query?: ShopQueryOptions) =>
       HttpClient.get<ShopPaginator>(API_ENDPOINTS.SHOPS, query),
     top: ({ name, ...query }: Partial<TopShopQueryOptions> = {}) =>
       HttpClient.get<ShopPaginator>(API_ENDPOINTS.TOP_SHOPS, {
         searchJoin: 'and',
-        // withCount: 'products',
-        ...query,
         search: HttpClient.formatSearchParams({
           name,
           is_active: 1,
         }),
+        ...query,
       }),
     get: (slug: string) =>
       HttpClient.get<Shop>(`${API_ENDPOINTS.SHOPS}/${slug}`),
   };
+
   orders = {
     all: (query?: OrderQueryOptions) =>
       HttpClient.get<OrderPaginator>(API_ENDPOINTS.ORDERS, query),
@@ -179,38 +187,85 @@ class Client {
       HttpClient.post<any>(API_ENDPOINTS.SAVE_PAYMENT_METHOD, input),
   };
   users = {
-    me: () =>
-      HttpClient.get<User>(API_ENDPOINTS.USERS_ME, {
-        with: 'permissions',
-      }),
-    update: (user: UpdateProfileInput) =>
-      HttpClient.put<User>(`${API_ENDPOINTS.USERS}/${user.id}`, user),
-    login: (input: LoginUserInput) =>
-      HttpClient.post<AuthResponse>(API_ENDPOINTS.USERS_LOGIN, input),
-    register: (input: RegisterUserInput) =>
-      HttpClient.post<AuthResponse>(API_ENDPOINTS.USERS_REGISTER, input),
-    forgotPassword: (input: ForgetPasswordInput) =>
-      HttpClient.post<PasswordChangeResponse>(
-        API_ENDPOINTS.USERS_FORGOT_PASSWORD,
-        input
-      ),
-    verifyForgotPasswordToken: (input: VerifyForgetPasswordTokenInput) =>
-      HttpClient.post<PasswordChangeResponse>(
-        API_ENDPOINTS.USERS_VERIFY_FORGOT_PASSWORD_TOKEN,
-        input
-      ),
-    resetPassword: (input: ResetPasswordInput) =>
-      HttpClient.post<PasswordChangeResponse>(
-        API_ENDPOINTS.USERS_RESET_PASSWORD,
-        input
-      ),
-    changePassword: (input: ChangePasswordInput) =>
-      HttpClient.post<PasswordChangeResponse>(
-        API_ENDPOINTS.USERS_CHANGE_PASSWORD,
-        input
-      ),
-    logout: () => HttpClient.post<boolean>(API_ENDPOINTS.USERS_LOGOUT, {}),
+    me: async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data) throw error || new Error('User data is null');
+      return mapSupabaseUserToUser(data.user);
+    },
+    update: async (user: UpdateUserInput) => {
+      const { data, error } = await supabase
+        .from('users')
+        .update(user)
+        .eq('id', user.id);
+      if (error || !data) throw error || new Error('User data is null');
+      return mapSupabaseUserToUser(data[0]);
+    },
+    login: async (input: LoginUserInput) => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: input.identifier,
+        password: input.password,
+      });
+      if (error || !data) throw error || new Error('Login data is null');
+      return {
+        token: data.session?.access_token || '',
+        permissions: [] // Assuming permissions can be handled separately
+      } as AuthResponse;
+    },
+    register: async (input: RegisterUserInput) => {
+      const { data, error } = await supabase.auth.signUp({
+        email: input.email,
+        password: input.password,
+        options: {
+          data: {
+            firstName: input.firstName,
+            lastName: input.lastName,
+            username: input.username,
+            country: input.country,
+            currency: input.currency,
+            bio: input.bio,
+          }
+        }
+      });
+      if (error || !data) throw error || new Error('Registration data is null');
+      return {
+        token: data.session?.access_token || '',
+        permissions: [] // Assuming permissions can be handled separately
+      } as AuthResponse;
+    },
+    forgotPassword: async (input: ForgetPasswordInput) => {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(input.email);
+      if (error) throw error;
+      return { success: true, message: 'Password reset email sent' } as PasswordChangeResponse;
+    },
+    verifyForgotPasswordToken: async (input: VerifyForgetPasswordTokenInput) => {
+      // Supabase handles this internally via the magic link mechanism
+      return { success: true, message: 'Token verified' } as PasswordChangeResponse;
+    },
+    resetPassword: async (input: ResetPasswordInput) => {
+      const { data, error } = await supabase.auth.updateUser({
+        password: input.password,
+      });
+      if (error) throw error;
+      return { success: true, message: 'Password reset successful' } as PasswordChangeResponse;
+    },
+    changePassword: async (input: ChangePasswordInput) => {
+      const { data, error } = await supabase.auth.updateUser({
+        password: input.newPassword,
+      });
+      if (error) throw error;
+      return { success: true, message: 'Password change successful' } as PasswordChangeResponse;
+    },
+    logout: async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      return true;
+    },
   };
+
+
+
+
+  
   questions = {
     all: ({ question, ...params }: QuestionQueryOptions) =>
       HttpClient.get<QuestionPaginator>(API_ENDPOINTS.PRODUCTS_QUESTIONS, {
@@ -220,14 +275,15 @@ class Client {
           question,
         }),
       }),
-
     create: (input: CreateQuestionInput) =>
       HttpClient.post<Review>(API_ENDPOINTS.PRODUCTS_QUESTIONS, input),
   };
+
   feedback = {
     create: (input: CreateFeedbackInput) =>
       HttpClient.post<Feedback>(API_ENDPOINTS.PRODUCTS_FEEDBACK, input),
   };
+
   abuse = {
     create: (input: CreateAbuseReportInput) =>
       HttpClient.post<Review>(
@@ -235,6 +291,7 @@ class Client {
         input
       ),
   };
+
   reviews = {
     all: ({ rating, ...params }: ReviewQueryOptions) =>
       HttpClient.get<ReviewPaginator>(API_ENDPOINTS.PRODUCTS_REVIEWS, {
@@ -255,6 +312,7 @@ class Client {
         input
       ),
   };
+
   wishlist = {
     all: (params: WishlistQueryOptions) =>
       HttpClient.get<ProductPaginator>(API_ENDPOINTS.USERS_WISHLIST, {
@@ -275,6 +333,7 @@ class Client {
         `${API_ENDPOINTS.WISHLIST}/in_wishlist/${product_id}`
       ),
   };
+
   myQuestions = {
     all: (params: MyQuestionQueryOptions) =>
       HttpClient.get<QuestionPaginator>(API_ENDPOINTS.MY_QUESTIONS, {
@@ -284,6 +343,7 @@ class Client {
         ...params,
       }),
   };
+
   myReports = {
     all: (params: MyReportsQueryOptions) =>
       HttpClient.get<QuestionPaginator>(API_ENDPOINTS.MY_REPORTS, {
@@ -293,6 +353,7 @@ class Client {
         ...params,
       }),
   };
+
   follow = {
     shops: (query?: FollowedShopsQueryOptions) =>
       HttpClient.get<ShopPaginator>(API_ENDPOINTS.FOLLOWED_SHOPS, query),
@@ -306,9 +367,21 @@ class Client {
       });
     },
   };
+
   settings = {
-    all: (params?: SettingsQueryOptions) =>
-      HttpClient.get<Settings>(API_ENDPOINTS.SETTINGS, { ...params }),
+    all: async (params?: SettingsQueryOptions): Promise<Settings> => {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('*'); // Remove language filter if not needed
+      if (error) throw error;
+
+      if (data.length === 0) {
+        throw new Error('Settings not found');
+      }
+
+      // Assuming you want the first item
+      return data[0] as Settings;
+    },
     contactUs: (input: CreateContactUsInput) =>
       HttpClient.post<any>(API_ENDPOINTS.SETTINGS_CONTACT_US, input),
     upload: (formData: FormData) => {
@@ -321,6 +394,8 @@ class Client {
     subscribe: (input: { email: string }) =>
       HttpClient.post<any>(API_ENDPOINTS.USERS_SUBSCRIBE_TO_NEWSLETTER, input),
   };
+
+
   cards = {
     all: (params?: any) =>
       HttpClient.get<Card[]>(API_ENDPOINTS.CARDS, { ...params }),
@@ -331,9 +406,8 @@ class Client {
     makeDefaultPaymentMethod: (input: any) =>
       HttpClient.post<any>(API_ENDPOINTS.SET_DEFAULT_CARD, input),
   };
+
   termsAndConditions = {
-    // all: (params?: any) =>
-    //   HttpClient.get<FAQS[]>(API_ENDPOINTS.FAQS, { ...params }),
     all: ({
       type,
       issued_by,
@@ -354,6 +428,7 @@ class Client {
     get: (id: string) =>
       HttpClient.get<FAQS>(`${API_ENDPOINTS.TERMS_AND_CONDITIONS}/${id}`),
   };
+
   faqs = {
     all: ({
       faq_type,
@@ -364,7 +439,6 @@ class Client {
       HttpClient.get<FaqsPaginator>(API_ENDPOINTS.FAQS, {
         ...params,
         search: HttpClient.formatSearchParams({
-          // faq_type,
           issued_by,
           shop_id,
         }),

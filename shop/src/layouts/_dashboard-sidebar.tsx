@@ -38,18 +38,18 @@ const menuItems = [
     label: 'text-auth-cards',
     path: routes.cards,
   },
-  {
-    id: 4,
-    icon: <HeartFillIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
-    label: 'text-auth-wishlist',
-    path: routes.wishlists,
-  },
-  {
-    id: 5,
-    icon: <ReportIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
-    label: 'text-my-disputes',
-    path: routes.disputes,
-  },
+  // {
+  //   id: 4,
+  //   icon: <HeartFillIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
+  //   label: 'text-auth-wishlist',
+  //   path: routes.wishlists,
+  // },
+  // {
+  //   id: 5,
+  //   icon: <ReportIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
+  //   label: 'text-my-disputes',
+  //   path: routes.disputes,
+  // },
   // {
   //   id: 6,
   //   icon: <InformationIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,

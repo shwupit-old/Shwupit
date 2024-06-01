@@ -18,6 +18,7 @@ func RegisterHandlers(router *mux.Router) {
 	router.HandleFunc("/api/user/me", meHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/me", meHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/logout", logoutHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/users/{user_id}", UpdateUserHandler).Methods("PUT", "OPTIONS")
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
