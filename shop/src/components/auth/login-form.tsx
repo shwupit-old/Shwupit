@@ -83,6 +83,9 @@ export default function LoginUserForm({ onClose }: LoginUserFormProps) {
         setAuthCredentials(data.session.access_token, []);
         closeModal();
         if (onClose) onClose();
+      }).finally(() => {
+        // Force a re-render to update the state and UI
+        window.location.reload();
       });
     },
     onError: () => {

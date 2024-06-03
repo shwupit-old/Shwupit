@@ -83,8 +83,12 @@ export default function RegisterUserForm() {
           });
           return;
         }
-        authorize(res.user.id);  // Adjust this according to your auth logic
-        closeModal();
+        authorize(res.user.id).then(() => {
+          closeModal();
+        }).finally(() => {
+          // Force a re-render to update the state and UI
+          window.location.reload();
+        });
       },
       onError: (err: any) => {
         if (axios.isAxiosError(err)) {
@@ -109,7 +113,6 @@ export default function RegisterUserForm() {
       },
     }
   );
-
   const onSubmit: SubmitHandler<RegisterUserInput> = (data) => {
     console.log("Form Data:", data); // Log the form data to verify structure
     setServerError(null); // Clear previous errors
