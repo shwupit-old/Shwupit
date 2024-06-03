@@ -255,11 +255,11 @@ class Client {
       if (error) throw error;
       return { success: true, message: 'Password change successful' } as PasswordChangeResponse;
     },
-    logout: async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      return true;
-    },
+      logout: async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        return true;
+      },
   };
 
 

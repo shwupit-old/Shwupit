@@ -6,7 +6,6 @@ import CheckBox from '@/components/ui/forms/checkbox';
 import { Form } from '@/components/ui/forms/form';
 import Input from '@/components/ui/forms/input';
 import Password from '@/components/ui/forms/password';
-import client from '@/data/client';
 import { setAuthCredentials } from '@/data/client/token.utils';
 import type { LoginUserInput } from '@/types';
 import { useTranslation } from 'next-i18next';
@@ -14,19 +13,15 @@ import type { SubmitHandler } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useMutation } from 'react-query';
 import * as yup from 'yup';
+import { supabase } from '@/data/utils/supabaseClient';
 
-// Custom validation function for email or username
 const emailOrUsernameSchema = yup
   .string()
-  .test(
-    'is-email-or-username',
-    'Must be a valid email or username',
-    value => {
-      if (!value) return false;
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(value) || value.trim().length > 0;
-    }
-  )
+  .test('is-email-or-username', 'Must be a valid email or username', value => {
+    if (!value) return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value) || value.trim().length > 0;
+  })
   .required();
 
 const loginValidationSchema = yup.object().shape({
@@ -34,31 +29,71 @@ const loginValidationSchema = yup.object().shape({
   password: yup.string().required(),
 });
 
-export default function LoginUserForm() {
+interface LoginUserFormProps {
+  onClose?: () => void;
+}
+
+export default function LoginUserForm({ onClose }: LoginUserFormProps) {
   const { t } = useTranslation('common');
   const { openModal, closeModal } = useModalAction();
   const { authorize } = useAuth();
-  const { mutate: login, isLoading } = useMutation(client.users.login, {
+
+  const login = async ({ identifier, password }: LoginUserInput) => {
+    let authResponse;
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+
+    if (isEmail) {
+      authResponse = await supabase.auth.signInWithPassword({
+        email: identifier,
+        password,
+      });
+    } else {
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('username', identifier)
+        .single();
+
+      if (userError || !userData) {
+        throw new Error('Invalid credentials');
+      }
+
+      authResponse = await supabase.auth.signInWithPassword({
+        email: userData.email,
+        password,
+      });
+    }
+
+    if (authResponse.error) {
+      throw new Error('Invalid credentials');
+    }
+
+    return authResponse.data;
+  };
+
+  const { mutate, isLoading } = useMutation(login, {
     onSuccess: (data) => {
-      if (!data.token) {
-        toast.error(<b>{t('text-wrong-user-name-and-pass')}</b>, {
+      if (!data.session) {
+        toast.error(<b>{t('Invalid credentials')}</b>, {
           className: '-mt-10 xs:mt-0',
         });
         return;
       }
-      authorize(data.token);
-      setAuthCredentials(data.token, data.permissions);
-      closeModal();
+      authorize(data.session.access_token).then(() => {
+        setAuthCredentials(data.session.access_token, []);
+        closeModal();
+        if (onClose) onClose();
+      });
     },
-    onError: (error) => {
-      toast.error(<b>{t('text-wrong-user-name-and-pass')}</b>, {
+    onError: () => {
+      toast.error(<b>{t('Invalid credentials')}</b>, {
         className: '-mt-10 xs:mt-0',
       });
     },
   });
 
   const onSubmit: SubmitHandler<LoginUserInput> = (data) => {
-    login(data);
+    mutate(data);
   };
 
   return (
@@ -94,15 +129,13 @@ export default function LoginUserForm() {
                   error={errors.identifier?.message}
                 />
                 <Password
-                  label="text-auth-password"
+                  label="Password"
                   inputClassName="bg-light dark:bg-dark-300"
                   {...register('password')}
                   error={errors.password?.message}
                 />
                 <div className="flex items-center justify-between space-x-5 rtl:space-x-reverse">
-                  <CheckBox
-                    label="text-remember-me"
-                  />
+                  <CheckBox label="Remember me" />
                   <button
                     type="button"
                     className="text-13px font-semibold text-brand hover:text-dark-400 hover:dark:text-light-500"

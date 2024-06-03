@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '@/layouts/_layout';
 import Seo from '@/layouts/_seo';
@@ -25,22 +25,33 @@ export const getStaticProps: GetStaticProps = async ({ locale }) => {
 };
 
 const Messages = () => {
-  const { isAuthorized } = useMe();
+  const { isAuthorized, isLoading, error } = useMe();
   const router = useRouter();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   useEffect(() => {
-    // Disable scroll on mount
-    document.body.style.overflow = 'hidden';
-    // Re-enable scroll on unmount
+    if (!isLoading && !isAuthorized) {
+      setIsLoginModalOpen(true);
+    } else {
+      setIsLoginModalOpen(false);
+    }
+  }, [isAuthorized, isLoading]);
+
+  useEffect(() => {
+    document.body.style.overflow = isLoginModalOpen ? 'hidden' : 'auto';
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, []);
+  }, [isLoginModalOpen]);
 
-  if (!isAuthorized) {
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+
+  if (isLoginModalOpen) {
     return (
-      <div className="flex items-center justify-center bg-gray-100">
+      <div className="flex items-center justify-center bg-gray-100 min-h-screen">
         <LoginUserForm onClose={() => setIsLoginModalOpen(false)} />
       </div>
     );

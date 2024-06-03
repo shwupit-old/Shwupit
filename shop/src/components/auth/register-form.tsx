@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import axios from 'axios';
 import type { SubmitHandler } from 'react-hook-form';
 import type { RegisterUserInput } from '@/types';
 import { useMutation } from 'react-query';
@@ -7,14 +8,12 @@ import { Form } from '@/components/ui/forms/form';
 import Password from '@/components/ui/forms/password';
 import { useModalAction } from '@/components/modal-views/context';
 import Input from '@/components/ui/forms/input';
-import client from '@/data/client';
 import Button from '@/components/ui/button';
-import { RegisterBgPattern } from '@/components/auth/register-bg-pattern';
 import { useState } from 'react';
 import useAuth from './use-auth';
 import { useTranslation } from 'next-i18next';
 import RegisterLocation from './register-location';
-import axios from 'axios';
+import { supabase } from '@/data/utils/supabaseClient';
 
 const registerUserValidationSchema = yup.object().shape({
   firstName: yup.string().max(20).required(),
@@ -23,7 +22,8 @@ const registerUserValidationSchema = yup.object().shape({
   email: yup.string().email().required(),
   password: yup.string().min(6).required(),
   country: yup.string().required('Country is required'),
-  bio: yup.string().max(500).nullable(), // Make bio nullable
+  currency: yup.string().required('Currency is required'),
+  bio: yup.string().max(500).nullable(),
 });
 
 type ServerError = {
@@ -37,34 +37,78 @@ export default function RegisterUserForm() {
   const { authorize } = useAuth();
   let [serverError, setServerError] = useState<ServerError | null>(null);
 
-  const { mutate } = useMutation(client.users.register, {
-    onSuccess: (res) => {
-      if (!res.token) {
-        toast.error(<b>{t('text-profile-page-error-toast')}</b>, {
-          className: '-mt-10 xs:mt-0',
-        });
-        return;
+  const registerUser = async (data: RegisterUserInput) => {
+    const { firstName, lastName, username, email, password, country, currency, bio } = data;
+
+    // Use Supabase to handle authentication
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username } // Adding username to the metadata
       }
-      authorize(res.token);
-      closeModal();
+    });
+
+    if (authError) {
+      throw authError;
+    }
+
+    const user = authData.user;
+
+    if (!user) {
+      throw new Error('User registration failed');
+    }
+
+    // Store additional user data in custom profiles table
+    const { error: insertError } = await supabase.from('profiles').insert([
+      { id: user.id, first_name: firstName, last_name: lastName, username, email, country, currency, bio },
+    ]);
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    return { user };
+  };
+
+  const { mutate } = useMutation(
+    async (data: RegisterUserInput) => {
+      return registerUser(data);
     },
-    onError: (err: any) => {
-      if (axios.isAxiosError(err) && err.response?.status === 409) {
-        // Handle conflict errors
-        const errorMessage = err.response.data;
-        if (errorMessage.includes("Username already exists")) {
-          setServerError({ username: errorMessage });
-          toast.error("Username already exists");
-        } else if (errorMessage.includes("Email already exists")) {
-          setServerError({ email: errorMessage });
-          toast.error("Email already exists");
+    {
+      onSuccess: (res) => {
+        if (!res.user) {
+          toast.error(<b>{t('text-profile-page-error-toast')}</b>, {
+            className: '-mt-10 xs:mt-0',
+          });
+          return;
         }
-      } else {
-        setServerError(err.response?.data || null);
-        toast.error(err.response?.data?.message || 'Registration failed');
-      }
-    },
-  });
+        authorize(res.user.id);  // Adjust this according to your auth logic
+        closeModal();
+      },
+      onError: (err: any) => {
+        if (axios.isAxiosError(err)) {
+          if (err.response?.status === 429) {
+            toast.error('Too many requests. Please try again later.');
+          } else if (err.response?.status === 409) {
+            const errorMessage = err.response.data;
+            if (errorMessage.includes("Username already exists")) {
+              setServerError({ username: errorMessage });
+              toast.error("Username already exists");
+            } else if (errorMessage.includes("Email already exists")) {
+              setServerError({ email: errorMessage });
+              toast.error("Email already exists");
+            }
+          } else {
+            setServerError(err.response?.data || null);
+            toast.error(err.response?.data?.message || 'Registration failed');
+          }
+        } else {
+          toast.error('An unexpected error occurred');
+        }
+      },
+    }
+  );
 
   const onSubmit: SubmitHandler<RegisterUserInput> = (data) => {
     console.log("Form Data:", data); // Log the form data to verify structure
