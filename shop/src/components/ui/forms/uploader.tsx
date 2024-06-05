@@ -1,15 +1,14 @@
 import type { Attachment } from '@/types';
 import cn from 'classnames';
+import client from '@/data/client';
 import { useCallback, useEffect, useState } from 'react';
-import { useDropzone, Accept } from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import { useMutation } from 'react-query';
-import { HttpClient } from '@/data/client/http-client';
-import Image from 'next/image';
+import Image from '@/components/ui/image';
 import { CloseIcon } from '@/components/icons/close-icon';
 import Button from '@/components/ui/button';
 import { SpinnerIcon } from '@/components/icons/spinner-icon';
 import { PlusIcon } from '@/components/icons/plus-icon';
-import toast from 'react-hot-toast';
 
 function getDefaultValues(attachment: Attachment[] | null) {
   if (!attachment) return null;
@@ -22,54 +21,50 @@ export default function Uploader({
   name,
   onBlur,
   multiple = true,
-  removeImage,
 }: any) {
-  const [attachments, setAttachments] = useState<Attachment[] | null>(getDefaultValues(value));
-
+  let [attachments, setAttachments] = useState<Attachment[] | null>(
+    getDefaultValues(value)
+  );
   useEffect(() => {
     setAttachments(getDefaultValues(value));
-    console.log('Uploader value updated:', value);
   }, [value]);
 
-  const { mutate, isLoading } = useMutation(
-    async (files: File[]) => {
-      const response = await HttpClient.uploadAttachments(files);
-      return response.map((file) => ({
-        ...file,
-        original: file.imagePath,
-      }));
+  const { mutate, isLoading } = useMutation(client.settings.upload, {
+    onSuccess: (response) => {
+      const data = multiple ? response : response[0];
+      onChange(data);
+      setAttachments(response);
     },
-    {
-      onSuccess: (response) => {
-        const data = multiple ? response : [response[0]];
-        console.log('Uploaded data:', data);
-        onChange(data);
-        setAttachments(data);
-      },
-      onError: (error) => {
-        console.error(error);
-        toast.error('Failed to upload image. Please try again.');
-      },
-    }
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+  const onDrop = useCallback(
+    (acceptedFiles: any) => {
+      mutate(acceptedFiles);
+    },
+    [mutate]
   );
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log('Files dropped:', acceptedFiles);
-    mutate(acceptedFiles);
-  }, [mutate]);
-
   const { getRootProps, getInputProps } = useDropzone({
-    accept: { 'image/*': [] } as Accept,
+    //@ts-ignore
+    accept: 'image/*',
     multiple,
     onDrop,
   });
 
   function remove(id: string) {
     if (!attachments) return;
-    const newAttachments = attachments.filter((attachment) => attachment.id !== id);
-    setAttachments(newAttachments.length ? newAttachments : null);
-    onChange(newAttachments.length ? newAttachments : null);
-    removeImage();
+    const newAttachments = attachments.filter(
+      (attachment) => attachment.id !== id
+    );
+    if (!newAttachments.length) {
+      setAttachments(null);
+      onChange(null);
+      return;
+    }
+    setAttachments(newAttachments);
+    const data = multiple ? newAttachments : newAttachments[0];
+    onChange(data);
   }
 
   return (
@@ -79,28 +74,34 @@ export default function Uploader({
           className: cn(
             'relative border-dashed border-2 border-light-500 dark:border-dark-600 text-center flex flex-col justify-center hover:text-black dark:hover:text-light items-center cursor-pointer focus:border-accent-400 focus:outline-none',
             {
-              'h-25 w-20 rounded-md shrink-0': multiple === true,
-              'h-40 w-full rounded': multiple === false,
+              'h-20 w-20 rounded-md shrink-0': multiple === true,
+              'h-36 w-full rounded': multiple === false,
             }
           ),
         })}
       >
-        <input {...getInputProps({ name, onBlur })} />
+        <input
+          {...getInputProps({
+            name,
+            onBlur,
+          })}
+        />
         {multiple !== true
-          ? Array.isArray(attachments) && attachments.length > 0
-            ? attachments.map(({ id, original }, index) => (
-                <div key={id || index}>
+          ? Array.isArray(attachments)
+            ? attachments.map(({ id, original }) => (
+                <div key={id}>
                   <div className="relative h-20 w-20 overflow-hidden rounded-full">
-                    {original ? (
-                      <Image alt="Avatar" src={original} className="object-scale-down" fill />
-                    ) : (
-                      'Upload Your Profile Picture'
-                    )}
+                    <Image
+                      alt="Avatar"
+                      src={original}
+                      fill
+                      className="object-scale-down"
+                    />
                   </div>
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      remove(id || index.toString());
+                      remove(id);
                     }}
                     variant="icon"
                     className="absolute right-0 top-0 p-3"
@@ -111,24 +112,28 @@ export default function Uploader({
               ))
             : 'Upload Your Profile Picture'
           : !isLoading && <PlusIcon className="h-5 w-5" />}
+
         {isLoading && (
           <span className="mt-2.5 flex items-center gap-1 font-medium text-light-500">
-            <SpinnerIcon className="h-auto w-5 animate-spin text-brand" /> {multiple !== true && 'Loading...'}
+            <SpinnerIcon className="h-auto w-5 animate-spin text-brand" />{' '}
+            {multiple !== true && 'Loading...'}
           </span>
         )}
       </div>
       {Array.isArray(attachments) &&
         multiple === true &&
-        attachments.map(({ id, original }, index) => (
-          <div key={id || index} className="group relative h-20 w-20 overflow-hidden rounded-md">
+        attachments.map(({ id, original }) => (
+          <div
+            key={id}
+            className="group relative h-20 w-20 overflow-hidden rounded-md"
+          >
             <div className="relative h-full w-full overflow-hidden rounded-md">
-              {original ? (
-                <Image alt="Attachment" src={original} className="object-cover" fill />
-              ) : (
-                <div className="bg-gray-200 h-full w-full flex items-center justify-center">
-                  <span className="text-gray-500">No Image</span>
-                </div>
-              )}
+              <Image
+                alt="Attachment"
+                src={original}
+                fill
+                className="object-cover"
+              />
             </div>
             <div className="absolute right-0 top-0 flex h-full w-full items-center justify-center bg-dark/60 opacity-0 transition-all group-hover:opacity-100">
               <Button

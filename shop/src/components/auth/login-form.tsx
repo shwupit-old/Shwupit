@@ -11,9 +11,10 @@ import type { LoginUserInput } from '@/types';
 import { useTranslation } from 'next-i18next';
 import type { SubmitHandler } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useMutation } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import * as yup from 'yup';
 import { supabase } from '@/data/utils/supabaseClient';
+
 
 const emailOrUsernameSchema = yup
   .string()
@@ -28,6 +29,16 @@ const loginValidationSchema = yup.object().shape({
   identifier: emailOrUsernameSchema,
   password: yup.string().required(),
 });
+
+ const fetchUser = async () => {
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error) {
+    throw error;
+  }
+
+  return data.user;
+};
 
 interface LoginUserFormProps {
   onClose?: () => void;
@@ -55,7 +66,7 @@ export default function LoginUserForm({ onClose }: LoginUserFormProps) {
         .single();
 
       if (userError || !userData) {
-        throw new Error('Invalid credentials');
+        throw new Error('Invalid Credentials!');
       }
 
       authResponse = await supabase.auth.signInWithPassword({
@@ -65,31 +76,33 @@ export default function LoginUserForm({ onClose }: LoginUserFormProps) {
     }
 
     if (authResponse.error) {
-      throw new Error('Invalid credentials');
+      throw new Error('Invalid Credentials!');
     }
 
     return authResponse.data;
   };
 
+  const { refetch } = useQuery('user', fetchUser, {
+    enabled: false,
+  });
+
   const { mutate, isLoading } = useMutation(login, {
     onSuccess: (data) => {
       if (!data.session) {
-        toast.error(<b>{t('Invalid credentials')}</b>, {
+        toast.error(<b>{t('Invalid Credentials!')}</b>, {
           className: '-mt-10 xs:mt-0',
         });
         return;
       }
       authorize(data.session.access_token).then(() => {
         setAuthCredentials(data.session.access_token, []);
+        refetch();
         closeModal();
         if (onClose) onClose();
-      }).finally(() => {
-        // Force a re-render to update the state and UI
-        window.location.reload();
       });
     },
     onError: () => {
-      toast.error(<b>{t('Invalid credentials')}</b>, {
+      toast.error(<b>{t('Invalid Credentials!')}</b>, {
         className: '-mt-10 xs:mt-0',
       });
     },

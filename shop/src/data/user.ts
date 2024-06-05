@@ -14,17 +14,29 @@ export function useMe() {
       throw new Error('Not authenticated');
     }
 
-    const { data, error } = await supabase
+    // Fetching user data from the profiles table
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('*')
+      .select('first_name, last_name, country, username, email, currency, profile_picture_url, bio')
       .eq('id', user.id)
       .single();
 
-    if (error) {
-      throw error;
+    if (profileError) {
+      throw profileError;
     }
 
-    return data;
+    // Combine the session data with profile data
+    return {
+      id: user.id,
+      username: profileData.username,
+      email: profileData.email,
+      firstName: profileData.first_name,
+      lastName: profileData.last_name,
+      country: profileData.country,
+      currency: profileData.currency,
+      profilePictureURL: profileData.profile_picture_url,
+      bio: profileData.bio,
+    };
   };
 
   const { data, isLoading, error, refetch } = useQuery('me', fetchUser, {

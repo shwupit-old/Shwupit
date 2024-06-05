@@ -1,11 +1,12 @@
 import { atom, useAtom } from 'jotai';
+import { useQueryClient } from 'react-query';
+import { supabase } from '@/data/utils/supabaseClient';
 import {
   checkHasAuthToken,
   getAuthToken,
   removeAuthToken,
   setAuthToken,
 } from '@/data/client/token.utils';
-import { supabase } from '@/data/utils/supabaseClient';
 
 const authorizationAtom = atom(checkHasAuthToken());
 const userAtom = atom(null);
@@ -13,6 +14,7 @@ const userAtom = atom(null);
 export default function useAuth() {
   const [isAuthorized, setAuthorized] = useAtom(authorizationAtom);
   const [user, setUser] = useAtom(userAtom);
+  const queryClient = useQueryClient(); // Initialize queryClient
 
   const fetchUserProfile = async () => {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -56,6 +58,7 @@ export default function useAuth() {
       setAuthToken(token);
       setAuthorized(true);
       await fetchUserProfile();
+      queryClient.invalidateQueries('me'); // Invalidate queries after authorization
     },
     unauthorize: async () => {
       const { error } = await supabase.auth.signOut();
@@ -65,6 +68,7 @@ export default function useAuth() {
         setAuthorized(false);
         removeAuthToken();
         setUser(null);
+        queryClient.invalidateQueries('me'); // Invalidate queries after unauthorization
       }
     },
   };

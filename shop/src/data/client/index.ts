@@ -68,7 +68,6 @@ import { supabase } from '../utils/supabaseClient';
 import {mapSupabaseUserToUser} from '@/types/index'
 import { createClient } from '@supabase/supabase-js';
 
-
 class Client {
   products = {
     all: ({
@@ -206,6 +205,12 @@ class Client {
         password: input.password,
       });
       if (error || !data) throw error || new Error('Login data is null');
+    
+      if (data.session?.access_token) {
+        localStorage.setItem('supabase.auth.token', data.session.access_token);
+      }
+    
+      await supabase.auth.setSession(data.session);
       return {
         token: data.session?.access_token || '',
         permissions: [] // Assuming permissions can be handled separately

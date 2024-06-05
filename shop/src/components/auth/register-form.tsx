@@ -1,8 +1,7 @@
 import * as yup from 'yup';
-import axios from 'axios';
 import type { SubmitHandler } from 'react-hook-form';
 import type { RegisterUserInput } from '@/types';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 import toast from 'react-hot-toast';
 import { Form } from '@/components/ui/forms/form';
 import Password from '@/components/ui/forms/password';
@@ -12,8 +11,9 @@ import Button from '@/components/ui/button';
 import { useState } from 'react';
 import useAuth from './use-auth';
 import { useTranslation } from 'next-i18next';
-import RegisterLocation from './register-location';
+import CountryLocation from './country-location';
 import { supabase } from '@/data/utils/supabaseClient';
+import { setAuthCredentials } from '@/data/client/token.utils';
 
 const registerUserValidationSchema = yup.object().shape({
   firstName: yup.string().max(20).required(),
@@ -26,6 +26,14 @@ const registerUserValidationSchema = yup.object().shape({
   bio: yup.string().max(500).nullable(),
 });
 
+const fetchUser = async () => {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    throw error;
+  }
+  return data.user;
+};
+
 type ServerError = {
   username?: string;
   email?: string;
@@ -34,19 +42,35 @@ type ServerError = {
 export default function RegisterUserForm() {
   const { t } = useTranslation('common');
   const { openModal, closeModal } = useModalAction();
-  const { authorize } = useAuth();
-  let [serverError, setServerError] = useState<ServerError | null>(null);
+  const { authorize } = useAuth(); // Correctly destructure authorize
+  const queryClient = useQueryClient();
+  const [serverError, setServerError] = useState<ServerError | null>(null);
 
   const registerUser = async (data: RegisterUserInput) => {
     const { firstName, lastName, username, email, password, country, currency, bio } = data;
 
-    // Use Supabase to handle authentication
+    // Check if username already exists
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', username)
+      .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') { // Ignore "No rows" error
+      throw fetchError;
+    }
+
+    if (existingUser) {
+      throw { message: 'Username already exists', status: 409 };
+    }
+
+    // Handle User Registration
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { username } // Adding username to the metadata
-      }
+        data: { username },
+      },
     });
 
     if (authError) {
@@ -68,51 +92,47 @@ export default function RegisterUserForm() {
       throw insertError;
     }
 
-    return { user };
+    return { user, session: authData.session };
   };
 
-  const { mutate } = useMutation(
-    async (data: RegisterUserInput) => {
-      return registerUser(data);
-    },
-    {
-      onSuccess: (res) => {
-        if (!res.user) {
-          toast.error(<b>{t('text-profile-page-error-toast')}</b>, {
-            className: '-mt-10 xs:mt-0',
-          });
-          return;
-        }
-        authorize(res.user.id).then(() => {
-          closeModal();
-        }).finally(() => {
-          // Force a re-render to update the state and UI
-          window.location.reload();
+  const { mutate } = useMutation(registerUser, {
+    onSuccess: async (res) => {
+      if (!res.user || !res.session) {
+        toast.error(<b>{t('text-profile-page-error-toast')}</b>, {
+          className: '-mt-10 xs:mt-0',
         });
-      },
-      onError: (err: any) => {
-        if (axios.isAxiosError(err)) {
-          if (err.response?.status === 429) {
-            toast.error('Too many requests. Please try again later.');
-          } else if (err.response?.status === 409) {
-            const errorMessage = err.response.data;
-            if (errorMessage.includes("Username already exists")) {
-              setServerError({ username: errorMessage });
-              toast.error("Username already exists");
-            } else if (errorMessage.includes("Email already exists")) {
-              setServerError({ email: errorMessage });
-              toast.error("Email already exists");
-            }
-          } else {
-            setServerError(err.response?.data || null);
-            toast.error(err.response?.data?.message || 'Registration failed');
-          }
-        } else {
-          toast.error('An unexpected error occurred');
-        }
-      },
-    }
-  );
+        return;
+      }
+      try {
+        const token = res.session.access_token;
+        authorize(token).then(() => {
+          setAuthCredentials(token, []);
+          queryClient.invalidateQueries('user');
+          closeModal();
+        });
+      } catch (error) {
+        toast.error(<b>{t('text-login-error-toast')}</b>, {
+          className: '-mt-10 xs:mt-0',
+        });
+      }
+    },
+    onError: (err: any) => {
+      console.error("Error: ", err); // Log error to the console for debugging
+
+      if (err.status === 409) {
+        setServerError({ username: 'Username already exists' });
+        toast.error('Username already exists');
+      } else if (err.status === 422 && err.message.includes('User already registered')) {
+        setServerError({ email: 'Email already exists' });
+        toast.error('Email already exists');
+      } else {
+        // Handle all other errors
+        setServerError({ username: 'An error occurred. Please try again.' });
+        toast.error('An error occurred. Please try again.');
+      }
+    },
+  });
+
   const onSubmit: SubmitHandler<RegisterUserInput> = (data) => {
     console.log("Form Data:", data); // Log the form data to verify structure
     setServerError(null); // Clear previous errors
@@ -179,7 +199,7 @@ export default function RegisterUserForm() {
                   {...register('password')}
                   error={errors.password?.message}
                 />
-                <RegisterLocation
+                <CountryLocation
                   onCountrySelect={(country) => setValue('country', country)}
                   setCurrency={(currency) => setValue('currency', currency as string)}  
                   error={errors.country?.message}

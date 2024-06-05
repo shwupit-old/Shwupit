@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Dropdown from '../ui/create-swap/components/dropdown-container';
 import axios from 'axios';
 
-interface RegisterLocationProps {
+interface CountryLocationProps {
   value?: string;
   onCountrySelect: (country: string) => void;
   setCurrency: React.Dispatch<React.SetStateAction<string>>;
   error?: string;
 }
 
-const RegisterLocation: React.FC<RegisterLocationProps> = ({ value, onCountrySelect, setCurrency, error }) => {
+const CountryLocation: React.FC<CountryLocationProps> = ({ value, onCountrySelect, setCurrency, error }) => {
   const [countries, setCountries] = useState<{ country: string, iso2: string }[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>(value || '');
 
@@ -71,12 +71,15 @@ const RegisterLocation: React.FC<RegisterLocationProps> = ({ value, onCountrySel
 
   return (
     <div className="flex flex-col gap-1 w-full">
-      <div className="flex-1">
+      <div
+        className="flex-1"
+        onClick={(e) => e.stopPropagation()} // Stop event propagation here
+      >
         <Dropdown
           label="Country"
           items={countries.map(country => country.country)}
           inputValue={selectedCountry}
-          onItemSelect={handleCountrySelect}
+          onItemSelect={handleCountrySelect} // Pass only the necessary argument
           {...dropdownStylingProps}
         />
         {error && (
@@ -89,4 +92,4 @@ const RegisterLocation: React.FC<RegisterLocationProps> = ({ value, onCountrySel
   );
 };
 
-export default RegisterLocation;
+export default CountryLocation;
