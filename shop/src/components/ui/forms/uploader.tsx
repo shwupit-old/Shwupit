@@ -46,8 +46,9 @@ export default function Uploader({
     [mutate]
   );
   const { getRootProps, getInputProps } = useDropzone({
-    //@ts-ignore
-    accept: 'image/*',
+    accept: {
+      'image/*': []
+    },
     multiple,
     onDrop,
   });
