@@ -89,7 +89,7 @@ const Single: React.FC<SingleProps> = ({ product }) => {
           <div className="lg:mx-auto 3xl:max-w-[1200px]">
             <div className="w-full rtl:space-x-reverse lg:flex lg:space-x-14 lg:pb-3 xl:space-x-20 3xl:space-x-28">
               <div className="hidden lg:block 3xl:max-w-[600px]">
-                <div className="pb-5 leading-[1.9em] dark:text-light-600">
+                <div className="pb-5 leading-[1.9em] dark:text-light-600 text-lg">
                   {description}
                 </div>
                 <ProductSocialShare
@@ -114,10 +114,6 @@ const Single: React.FC<SingleProps> = ({ product }) => {
                 ratings={ratings}
               />
               <ProductReviews productId={id} />
-              <ProductQuestions
-                productId={product?.id}
-                shopId={product?.shop?.id}
-              />
             </div>
           </div>
 

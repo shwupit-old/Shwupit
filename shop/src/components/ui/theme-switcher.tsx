@@ -7,7 +7,7 @@ import { useIsMounted } from '@/lib/hooks/use-is-mounted';
 export default function ThemeSwitcher() {
   const isMounted = useIsMounted();
   const { resolvedTheme, setTheme } = useTheme();
-  const isDarkMode = resolvedTheme === 'dark';
+  const isDarkMode = resolvedTheme === 'light';
   return (
     <Button
       variant="icon"
@@ -23,4 +23,5 @@ export default function ThemeSwitcher() {
       </span>
     </Button>
   );
+  return null;
 }

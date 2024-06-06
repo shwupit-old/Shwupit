@@ -1,7 +1,7 @@
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import type { GetStaticProps } from 'next';
 import { useTranslation } from 'next-i18next';
-import type { NextPageWithLayout, UpdateProfileInput } from '@/types';
+import type { NextPageWithLayout, UpdateUserInput } from '@/types';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
@@ -11,7 +11,6 @@ import DashboardLayout from '@/layouts/_dashboard';
 import { Form } from '@/components/ui/forms/form';
 import Input from '@/components/ui/forms/input';
 import Textarea from '@/components/ui/forms/textarea';
-import { ReactPhone } from '@/components/ui/forms/phone-input';
 import Button from '@/components/ui/button';
 import client from '@/data/client';
 import { fadeInBottom } from '@/lib/framer-motion/fade-in-bottom';
@@ -19,26 +18,31 @@ import { useMe } from '@/data/user';
 import pick from 'lodash/pick';
 import { API_ENDPOINTS } from '@/data/client/endpoints';
 import Uploader from '@/components/ui/forms/uploader';
+import CountryLocation from '@/components/auth/country-location';
 import * as yup from 'yup';
+import { useEffect } from 'react';
+import { supabase } from '@/data/utils/supabaseClient';
 
 const profileValidationSchema = yup.object().shape({
   id: yup.string().required(),
-  name: yup.string().required(),
-  profile: yup.object().shape({
-    id: yup.string(),
-    bio: yup.string(),
-    contact: yup.string(),
-    avatar: yup
-      .object()
-      .shape({
-        id: yup.string(),
-        thumbnail: yup.string(),
-        original: yup.string(),
-      })
-      .optional()
-      .nullable(),
-  }),
+  username: yup.string().required(),
+  firstName: yup.string().max(20).required(),
+  lastName: yup.string().max(20).required(),
+  email: yup.string().email().required(),
+  country: yup.string().required('Country is required'),
+  currency: yup.string().required('Currency is required'),
+  profilePictureURL: yup
+    .object()
+    .shape({
+      id: yup.string(),
+      thumbnail: yup.string(),
+      original: yup.string(),
+    })
+    .optional()
+    .nullable(),
+  bio: yup.string().max(500).nullable(),
 });
+
 const ProfilePage: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
   const queryClient = useQueryClient();
@@ -59,7 +63,8 @@ const ProfilePage: NextPageWithLayout = () => {
       queryClient.invalidateQueries(API_ENDPOINTS.USERS_ME);
     },
   });
-  const onSubmit: SubmitHandler<UpdateProfileInput> = (data) => mutate(data);
+
+  const onSubmit: SubmitHandler<UpdateUserInput> = (data) => mutate(data);
 
   return (
     <motion.div
@@ -69,100 +74,135 @@ const ProfilePage: NextPageWithLayout = () => {
       <h1 className="mb-5 text-15px font-medium text-dark dark:text-light sm:mb-6">
         {t('text-profile-page-title')}
       </h1>
-      <Form<UpdateProfileInput>
+      <Form<UpdateUserInput>
         onSubmit={onSubmit}
         useFormProps={{
-          defaultValues: pick(me, [
-            'id',
-            'name',
-            'profile.id',
-            'profile.contact',
-            'profile.bio',
-            'profile.avatar',
-          ]),
+          defaultValues: me && {
+            id: me.id,
+            username: me.username,
+            firstName: me.firstName,
+            lastName: me.lastName,
+            email: me.email,
+            country: me.country,
+            currency: me.currency,
+            profilePictureURL: me.profilePictureURL,
+            bio: me.bio,
+          },
         }}
         validationSchema={profileValidationSchema}
         className="flex flex-grow flex-col"
       >
-        {({ register, reset, control, formState: { errors } }) => (
-          <>
-            <fieldset className="mb-6 grid gap-5 pb-5 sm:grid-cols-2 md:pb-9 lg:mb-8">
-              <Controller
-                name="profile.avatar"
-                control={control}
-                render={({ field: { ref, ...rest } }) => (
-                  <div className="sm:col-span-2">
-                    <span className="block cursor-pointer pb-2.5 font-normal text-dark/70 dark:text-light/70">
-                      {t('text-profile-avatar')}
-                    </span>
-                    <div className="text-xs">
-                      <Uploader {...rest} multiple={false} />
-                    </div>
-                  </div>
-                )}
-              />
-              <Input
-                label={t('text-profile-name')}
-                {...register('name')}
-                error={errors.name?.message}
-              />
-              <div>
-                <span className="block cursor-pointer pb-2.5 font-normal text-dark/70 dark:text-light/70">
-                  {t('text-profile-contact')}
-                </span>
-                <Controller
-                  name="profile.contact"
-                  control={control}
-                  render={({ field }) => <ReactPhone country="us" {...field} />}
-                />
+        {({ register, reset, control, setValue, formState: { errors } }) => {
+          // Reset form values when `me` changes
+          useEffect(() => {
+            if (me) {
+              reset({
+                id: me.id,
+                username: me.username,
+                firstName: me.firstName,
+                lastName: me.lastName,
+                email: me.email,
+                country: me.country,
+                currency: me.currency,
+                profilePictureURL: me.profilePictureURL,
+                bio: me.bio,
+              });
+            }
+          }, [me, reset]);
 
-                {errors.profile?.contact?.message && (
-                  <span
-                    role="alert"
-                    className="block pt-2 text-xs text-warning"
-                  >
-                    {'contact field is required'}
-                  </span>
-                )}
-              </div>
-              <Textarea
-                label={t('text-profile-bio')}
-                {...register('profile.bio')}
-                error={errors.profile?.bio?.message && 'bio field is required'}
-                className="sm:col-span-2"
-              />
-            </fieldset>
-            <div className="mt-auto flex items-center gap-4 pb-3 lg:justify-end">
-              <Button
-                type="reset"
-                onClick={() =>
-                  reset({
-                    id: me?.id,
-                    name: '',
-                    profile: {
-                      id: me?.profile?.id,
-                      avatar: null,
+          return (
+            <>
+              <fieldset className="mb-6 grid gap-5 pb-5 sm:grid-cols-2 md:pb-9 lg:mb-8">
+                <Controller
+                  name="profilePictureURL"
+                  control={control}
+                  render={({ field: { ref, ...rest } }) => (
+                    <div className="sm:col-span-2">
+                      <span className="block cursor-pointer pb-2.5 font-normal text-dark/70 dark:text-light/70">
+                        {t('text-profile-avatar')}
+                      </span>
+                      <div className="text-xs">
+                        <Uploader {...rest} multiple={false} />
+                      </div>
+                    </div>
+                  )}
+                />
+                <Textarea
+                  label={t('text-profile-bio')}
+                  {...register('bio')}
+                  error={errors.bio?.message && 'bio field is required'}
+                  className="sm:col-span-2"
+                />
+                <Input
+                  label="Username"
+                  {...register('username')}
+                  error={errors.username?.message}
+                />
+                <Input
+                  label="First Name"
+                  inputClassName="bg-light dark:bg-dark-300"
+                  {...register('firstName')}
+                  error={errors.firstName?.message}
+                />
+                <Input
+                  label="Last Name"
+                  inputClassName="bg-light dark:bg-dark-300"
+                  {...register('lastName')}
+                  error={errors.lastName?.message}
+                />
+                <Input
+                  label="Email"
+                  inputClassName="bg-light dark:bg-dark-300"
+                  type="email"
+                  {...register('email')}
+                  error={errors.email?.message}
+                />
+                <Controller
+                  name="country"
+                  control={control}
+                  render={({ field }) => (
+                    <CountryLocation
+                      value={field.value}
+                      onCountrySelect={field.onChange}
+                      setCurrency={(currency) => setValue('currency', currency as string)}
+                      error={errors.country?.message}
+                    />
+                  )}
+                />
+              </fieldset>
+              <div className="mt-auto flex items-center gap-4 pb-3 lg:justify-end">
+                <Button
+                  type="reset"
+                  onClick={() =>
+                    reset({
+                      id: me?.id,
+                      username: '',
+                      firstName: '',
+                      lastName: '',
+                      email: '',
+                      country: '',
+                      currency: '',
+                      profilePictureURL: '',
                       bio: '',
-                      contact: '',
-                    },
-                  })
-                }
-                disabled={isLoading}
-                variant="outline"
-                className="flex-1 lg:flex-none"
-              >
-                {t('text-cancel')}
-              </Button>
-              <Button
-                className="flex-1 lg:flex-none"
-                isLoading={isLoading}
-                disabled={isLoading}
-              >
-                {t('text-save-changes')}
-              </Button>
-            </div>
-          </>
-        )}
+                    })
+                  }
+                  disabled={isLoading}
+                  variant="outline"
+                  className="flex-1 lg:flex-none"
+                >
+                  {t('text-cancel')}
+                </Button>
+                <Button
+                  className="flex-1 lg:flex-none"
+                  isLoading={isLoading}
+                  disabled={isLoading}
+                >
+                  {t('text-save-changes')}
+                </Button>
+              </div>
+            </>
+          );
+        }}
       </Form>
     </motion.div>
   );

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import cn from 'classnames';
 import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
+import { supabase } from '@/data/utils/supabaseClient'; // Adjust the path as needed
 
 const classes = {
   base: 'inline-flex items-center justify-center flex-shrink-0 border text-accent border-border-100 bg-accent/10 overflow-hidden relative',
@@ -28,8 +29,6 @@ const classes = {
 
 type AvatarProps = {
   src?: string;
-  name: string;
-  initials?: string;
   size?: keyof typeof classes.size;
   customSize?: string;
   rounded?: keyof typeof classes.rounded;
@@ -39,18 +38,15 @@ type AvatarProps = {
 
 const CHECK_VALID_CUSTOM_SIZE = /(\d*px)?/g;
 
-function getInitials(name: string) {
-  if (!name) return 'GU';
-  const words = name.split(' ');
-  const initials = words.map((word) => word[0]);
-  return initials.slice(0, 2).join('').toUpperCase();
+function getInitials(firstName: string, lastName: string) {
+  if (!firstName && !lastName) return 'GU';
+  const initials = (firstName[0] || '') + (lastName[0] || '');
+  return initials.toUpperCase();
 }
 
 const Avatar: React.FC<AvatarProps> = ({
   src,
-  name,
   size = 'DEFAULT',
-  initials,
   customSize,
   rounded = 'full',
   onClick,
@@ -58,6 +54,38 @@ const Avatar: React.FC<AvatarProps> = ({
   ...rest
 }) => {
   const [isError, setError] = React.useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        console.log('Session data:', sessionData);
+        if (sessionError) throw sessionError;
+
+        const user = sessionData?.session?.user;
+        if (!user) throw new Error('Not authenticated');
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', user.id)
+          .single();
+
+        if (error) throw error;
+
+  
+
+        setFirstName(data.first_name);
+        setLastName(data.last_name);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   // checking customSize value
   if (customSize?.match(CHECK_VALID_CUSTOM_SIZE)) {
@@ -89,19 +117,19 @@ const Avatar: React.FC<AvatarProps> = ({
         {...rest}
       >
         <Image
-          alt={name}
+          alt={`${firstName} ${lastName}`}
           src={src}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add the sizes prop for performance improvement
           priority={true}
-          sizes="(max-width: 768px) 100vw"
-          onError={() => setError(() => true)}
+          onError={() => setError(true)}
         />
       </div>
     );
   }
   return (
     <span
-      title={name}
+      title={`${firstName} ${lastName}`}
       className={twMerge(
         cn(
           classes.base,
@@ -118,7 +146,7 @@ const Avatar: React.FC<AvatarProps> = ({
       }}
       onClick={onClick}
     >
-      {initials || getInitials(name)}
+      {getInitials(firstName, lastName)}
     </span>
   );
 };

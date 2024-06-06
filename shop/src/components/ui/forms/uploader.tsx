@@ -46,8 +46,9 @@ export default function Uploader({
     [mutate]
   );
   const { getRootProps, getInputProps } = useDropzone({
-    //@ts-ignore
-    accept: 'image/*',
+    accept: {
+      'image/*': []
+    },
     multiple,
     onDrop,
   });
@@ -110,7 +111,7 @@ export default function Uploader({
                   </Button>
                 </div>
               ))
-            : 'Upload Your Avatar Image (80 X 80)'
+            : 'Upload Your Profile Picture'
           : !isLoading && <PlusIcon className="h-5 w-5" />}
 
         {isLoading && (

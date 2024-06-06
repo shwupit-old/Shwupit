@@ -1,5 +1,9 @@
 {
   "dependencies": {
-    "yarn": "^1.22.22"
+    "aws": "^0.0.3-2",
+    "currency-symbol-map": "^5.1.0",
+    "react-query": "^3.39.3",
+    "yarn": "^1.22.22",
+    "zx": "^8.1.1"
   }
 }

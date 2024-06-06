@@ -1,16 +1,7 @@
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import type { GetStaticProps } from 'next';
-import { useTranslation } from 'next-i18next';
-import type { NextPageWithLayout, Product } from '@/types';
-import { motion } from 'framer-motion';
-import DashboardLayout from '@/layouts/_dashboard';
+import React from 'react';
 import Image from '@/components/ui/image';
-import CartEmpty from '@/components/cart/cart-empty';
-import { fadeInBottom } from '@/lib/framer-motion/fade-in-bottom';
-import rangeMap from '@/lib/range-map';
-import Button from '@/components/ui/button';
 import placeholder from '@/assets/images/placeholders/product.svg';
-import { useRemoveFromWishlist, useWishlist } from '@/data/wishlist';
+import { useRemoveFromWishlist } from '@/data/wishlist';
 import usePrice from '@/lib/hooks/use-price';
 import { isFree } from '@/lib/is-free';
 import AddToCart from '@/components/cart/add-to-cart';
@@ -18,22 +9,14 @@ import FreeDownloadButton from '@/components/product/free-download-button';
 import classNames from 'classnames';
 import { HeartFillIcon } from '@/components/icons/heart-fill';
 import Link from '@/components/ui/link';
+import type { Product } from '@/types';
 
-function WishlistItem({ product }: { product: Product }) {
+export function WishlistItem({ product }: { product: Product }) {
   const { removeFromWishlist, isLoading } = useRemoveFromWishlist();
-  const {
-    id,
-    slug,
-    name,
-    image,
-    price: main_price,
-    sale_price,
-    shop,
-  } = product ?? {};
+  const { id, slug, name, image, price: main_price, sale_price, shop } = product ?? {};
 
-  const { price, basePrice } = usePrice({
+  const { price } = usePrice({
     amount: sale_price ? sale_price : main_price,
-    baseAmount: main_price,
   });
   const productSingleUrl =
     product?.language !== process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE
@@ -69,11 +52,6 @@ function WishlistItem({ product }: { product: Product }) {
             <span className="rounded-full bg-light-500 px-1.5 py-1 text-13px font-semibold uppercase text-brand dark:bg-dark-500 dark:text-brand-dark">
               {isFreeItem ? 'Free' : price}
             </span>
-            {!isFreeItem && basePrice && (
-              <del className="ml-2 px-1 text-13px font-medium text-dark-900 dark:text-dark-700">
-                {basePrice}
-              </del>
-            )}
           </div>
         </div>
 
@@ -114,84 +92,3 @@ function WishlistItem({ product }: { product: Product }) {
     </div>
   );
 }
-
-function WishlistItemLoader(props: any) {
-  return (
-    <div className="flex animate-pulse items-start gap-4 border-b border-light-400 py-4 last:border-b-0 dark:border-dark-400 sm:items-stretch sm:gap-5">
-      <div className="relative aspect-[5/3.4] w-28 flex-shrink-0 bg-light-400 dark:bg-dark-400 sm:w-32 md:w-36" />
-      <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between md:gap-0">
-        <div className="h-full flex-grow border-b border-light-400 pb-3 dark:border-dark-600 sm:border-b-0 sm:pb-0">
-          <div className="mb-3 h-2.5 w-1/4 bg-light-400 dark:bg-dark-400" />
-          <div className="mb-6 h-2.5 w-2/4 bg-light-400 dark:bg-dark-400" />
-          <div className="h-2.5 w-1/5 bg-light-400 dark:bg-dark-400" />
-        </div>
-        <div className="h-2.5  bg-light-400 dark:bg-dark-400 sm:h-12  sm:w-28 sm:rounded " />
-        <div className="ml-3 h-2.5 w-4 bg-light-400 dark:bg-dark-400 sm:h-12 sm:w-12 sm:rounded" />
-      </div>
-    </div>
-  );
-}
-
-const LIMIT = 10;
-const MyWishlistPage: NextPageWithLayout = () => {
-  const { t } = useTranslation('common');
-  const { wishlists, isLoading, isLoadingMore, loadMore, hasNextPage } =
-    useWishlist();
-
-  return (
-    <motion.div
-      variants={fadeInBottom()}
-      className="flex min-h-full flex-grow flex-col"
-    >
-      <h1 className="mb-3 text-15px font-medium text-dark dark:text-light">
-        {t('text-wishlist-title')}
-        <span className="ml-1 text-light-900">({wishlists.length})</span>
-      </h1>
-
-      {isLoading &&
-        !wishlists.length &&
-        rangeMap(LIMIT, (i) => (
-          <WishlistItemLoader key={`order-loader-${i}`} />
-        ))}
-
-      {!isLoading && !wishlists.length ? (
-        <CartEmpty
-          className="my-auto"
-          description={t('text-product-purchase-message')}
-        />
-      ) : (
-        wishlists.map((product) => (
-          <WishlistItem key={product.id} product={product} />
-        ))
-      )}
-
-      {hasNextPage && (
-        <div className="mt-10 grid place-content-center">
-          <Button
-            onClick={loadMore}
-            disabled={isLoadingMore}
-            isLoading={isLoadingMore}
-          >
-            {t('text-loadmore')}
-          </Button>
-        </div>
-      )}
-    </motion.div>
-  );
-};
-
-MyWishlistPage.authorization = true;
-MyWishlistPage.getLayout = function getLayout(page) {
-  return <DashboardLayout>{page}</DashboardLayout>;
-};
-
-export const getStaticProps: GetStaticProps = async ({ locale }) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale!, ['common'])),
-    },
-    revalidate: 60, // In seconds
-  };
-};
-
-export default MyWishlistPage;

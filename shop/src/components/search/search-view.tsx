@@ -54,7 +54,7 @@ export default function SearchView() {
                 autoFocus={true}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                placeholder="Discover your next shwup... Sneakers, Electronics, Collectibles, Books"
+                placeholder="Discover your next swap"
                 className="w-full border-0 bg-transparent px-1 text-base text-dark outline-none focus:ring-0 dark:text-light md:text-lg lg:text-xl 3xl:text-[22px] 4xl:text-2xl"
               />
               {searchText && (

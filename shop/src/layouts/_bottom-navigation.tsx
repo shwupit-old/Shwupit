@@ -5,7 +5,9 @@ import SearchButton from '@/components/search/search-button';
 import CartButton from '@/components/cart/cart-button';
 import Hamburger from '@/components/ui/hamburger';
 import { HomeIcon } from '@/components/icons/home-icon';
+import { PaperPlaneIcon } from '@/components/icons/paper-plane-icon';
 import { useDrawer } from '@/components/drawer-views/context';
+import ChatIcon from '@/components/icons/chat-icon';
 
 export default function BottomNavigation() {
   const router = useRouter();
@@ -19,8 +21,15 @@ export default function BottomNavigation() {
       >
         <HomeIcon className="h-5 w-5" />
       </Button>
+      <Button
+        variant="icon"
+        aria-label="Messages"
+        onClick={() => router.push(routes.messages)}
+      >
+        <ChatIcon className="h-5 w-5" />
+      </Button>
       <SearchButton />
-      {router.asPath !== routes.checkout && <CartButton className="mt-1.5" />}
+   
       <Hamburger onClick={() => openDrawer('MOBILE_MENU')} />
     </nav>
   );

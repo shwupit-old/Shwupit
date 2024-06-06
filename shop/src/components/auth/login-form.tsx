@@ -6,48 +6,119 @@ import CheckBox from '@/components/ui/forms/checkbox';
 import { Form } from '@/components/ui/forms/form';
 import Input from '@/components/ui/forms/input';
 import Password from '@/components/ui/forms/password';
-import client from '@/data/client';
 import { setAuthCredentials } from '@/data/client/token.utils';
 import type { LoginUserInput } from '@/types';
 import { useTranslation } from 'next-i18next';
 import type { SubmitHandler } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useMutation } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import * as yup from 'yup';
+import { supabase } from '@/data/utils/supabaseClient';
+
+
+const emailOrUsernameSchema = yup
+  .string()
+  .test('is-email-or-username', 'Must be a valid email or username', value => {
+    if (!value) return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value) || value.trim().length > 0;
+  })
+  .required();
 
 const loginValidationSchema = yup.object().shape({
-  email: yup.string().email().required(),
+  identifier: emailOrUsernameSchema,
   password: yup.string().required(),
 });
 
-export default function LoginUserForm() {
+ const fetchUser = async () => {
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error) {
+    throw error;
+  }
+
+  return data.user;
+};
+
+interface LoginUserFormProps {
+  onClose?: () => void;
+}
+
+export default function LoginUserForm({ onClose }: LoginUserFormProps) {
   const { t } = useTranslation('common');
   const { openModal, closeModal } = useModalAction();
   const { authorize } = useAuth();
-  const { mutate: login, isLoading } = useMutation(client.users.login, {
+
+  const login = async ({ identifier, password }: LoginUserInput) => {
+    let authResponse;
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+
+    if (isEmail) {
+      authResponse = await supabase.auth.signInWithPassword({
+        email: identifier,
+        password,
+      });
+    } else {
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('username', identifier)
+        .single();
+
+      if (userError || !userData) {
+        throw new Error('Invalid Credentials!');
+      }
+
+      authResponse = await supabase.auth.signInWithPassword({
+        email: userData.email,
+        password,
+      });
+    }
+
+    if (authResponse.error) {
+      throw new Error('Invalid Credentials!');
+    }
+
+    return authResponse.data;
+  };
+
+  const { refetch } = useQuery('user', fetchUser, {
+    enabled: false,
+  });
+
+  const { mutate, isLoading } = useMutation(login, {
     onSuccess: (data) => {
-      if (!data.token) {
-        toast.error(<b>{t('text-wrong-user-name-and-pass')}</b>, {
+      if (!data.session) {
+        toast.error(<b>{t('Invalid Credentials!')}</b>, {
           className: '-mt-10 xs:mt-0',
         });
         return;
       }
-      authorize(data.token);
-      setAuthCredentials(data.token, data.permissions);
-      closeModal();
+      authorize(data.session.access_token).then(() => {
+        setAuthCredentials(data.session.access_token, []);
+        refetch();
+        closeModal();
+        if (onClose) onClose();
+      });
+    },
+    onError: () => {
+      toast.error(<b>{t('Invalid Credentials!')}</b>, {
+        className: '-mt-10 xs:mt-0',
+      });
     },
   });
+
   const onSubmit: SubmitHandler<LoginUserInput> = (data) => {
-    login(data);
+    mutate(data);
   };
+
   return (
     <div className="bg-light px-6 pb-8 pt-10 dark:bg-dark-300 sm:px-8 lg:p-12">
-      <RegisterBgPattern className="absolute bottom-0 left-0 text-light dark:text-dark-300 dark:opacity-60" />
       <div className="relative z-10 flex items-center">
         <div className="w-full shrink-0 text-left md:w-[380px]">
           <div className="flex flex-col pb-5 text-center xl:pb-6 xl:pt-2">
             <h2 className="text-lg font-medium tracking-[-0.3px] text-dark dark:text-light lg:text-xl">
-              {t('text-welcome-back')}
+              {t('text-start-swapping')}
             </h2>
             <div className="mt-1.5 text-13px leading-6 tracking-[0.2px] dark:text-light-900 lg:mt-2.5 xl:mt-3">
               {t('text-join-now')}{' '}
@@ -62,34 +133,25 @@ export default function LoginUserForm() {
           <Form<LoginUserInput>
             onSubmit={onSubmit}
             validationSchema={loginValidationSchema}
-            useFormProps={{
-              defaultValues: {
-                email: 'customer@demo.com',
-                password: 'demodemo',
-              },
-            }}
             className="space-y-4 pt-4 lg:space-y-5"
           >
             {({ register, formState: { errors } }) => (
               <>
                 <Input
-                  label="contact-us-email-field"
+                  label="Username or Email"
                   inputClassName="bg-light dark:bg-dark-300"
-                  type="email"
-                  {...register('email')}
-                  error={errors.email?.message}
+                  type="text"
+                  {...register('identifier')}
+                  error={errors.identifier?.message}
                 />
                 <Password
-                  label="text-auth-password"
+                  label="Password"
                   inputClassName="bg-light dark:bg-dark-300"
                   {...register('password')}
                   error={errors.password?.message}
                 />
                 <div className="flex items-center justify-between space-x-5 rtl:space-x-reverse">
-                  <CheckBox
-                    label="text-remember-me"
-                    // inputClassName="bg-light dark:bg-dark-300"
-                  />
+                  <CheckBox label="Remember me" />
                   <button
                     type="button"
                     className="text-13px font-semibold text-brand hover:text-dark-400 hover:dark:text-light-500"

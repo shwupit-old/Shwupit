@@ -30,20 +30,20 @@ export const AuthorizedMenuItems = [
     label: 'text-auth-profile',
     path: routes.profile,
   },
-  {
-    label: 'text-auth-purchase',
-    path: routes.purchases,
-  },
-  {
-    label: 'text-auth-wishlist',
-    path: routes.wishlists,
-  },
-  {
-    label: 'text-followed-authors',
-    path: routes.followedShop,
-  },
-  {
-    label: 'text-auth-password',
-    path: routes.password,
-  },
+  // {
+  //   label: 'text-auth-swap-disputes',
+  //   path: routes.disputes,
+  // },
+  // {
+  //   label: 'text-auth-wishlist',
+  //   path: routes.wishlists,
+  // },
+  // {
+  //   label: 'text-followed-authors',
+  //   path: routes.followedShop,
+  // },
+  // {
+  //   label: 'text-auth-password',
+  //   path: routes.password,
+  // },
 ];

@@ -81,8 +81,8 @@ const Explore: NextPageWithLayout = () => {
   return (
     <>
       <Seo
-        title="UI Design Resources, UI Kits, Wireframes, Icons and More"
-        description="Fastest digital download template built with React, NextJS, TypeScript, React-Query and Tailwind CSS."
+        title="ShwupIt: Swap Smart, Swap Easy"
+        description="Welcome to ShwupIt – your premier destination for effortless online swapping! Dive into a world where trading items is as easy as a click. From fashion to tech, find and exchange goods that match your lifestyle. Join the ShwupIt community and make your swaps count!"
         url={routes.home}
       />
       <PromotionalSlider />

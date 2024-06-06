@@ -65,8 +65,8 @@ export default function DrawersContainer() {
             <div
               className={
                 ['MAINTENANCE_MORE_INFO']?.includes(view)
-                  ? 'max-w-sm md:max-w-xl'
-                  : 'w-screen max-w-md'
+                  ? 'max-w-sm md:max-w-3xl lg:max-w-5xl xl:max-w-7xl' // even wider on medium, large, and extra-large screens
+                  : 'w-screen max-w-md md:max-w-xl lg:max-w-3xl' // adjust this line to increase width on tablet and desktop screens
               }
             >
               <div className="flex h-full flex-col bg-light shadow-xl dark:bg-dark-300">

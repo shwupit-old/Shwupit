@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { UpdateIcon } from '@/components/icons/update-icon';
 import { CalenderIcon } from '@/components/icons/calendar-icon';
 import { LayoutIcon } from '@/components/icons/layout-icon';
@@ -10,6 +11,10 @@ import routes from '@/config/routes';
 import { useTranslation } from 'next-i18next';
 import { getIcon } from '@/lib/get-icon';
 import * as TypeIcons from '@/components/icons/type/index';
+import { LocationIcon } from '../icons/contact/location-icon';
+
+// Extend dayjs with the relativeTime plugin
+dayjs.extend(relativeTime);
 
 interface Props {
   className?: string;
@@ -31,40 +36,29 @@ export default function ProductInformation({
   const { t } = useTranslation('common');
   return (
     <div className={classNames('space-y-4 text-13px', className)}>
+      {/* Add user location */}
       <div className="flex items-start text-dark dark:text-light">
         <strong className="flex w-36 flex-shrink-0 items-center font-normal text-dark-600 dark:text-light-600">
           <span className="w-8 flex-shrink-0 text-dark-900 dark:text-light-900">
-            <UpdateIcon className="h-[18px] w-[18px]" />
+            <LocationIcon className="h-[18px] w-[18px]" />
           </span>
-          {t('text-last-update')}:
+          Location:
         </strong>
         <span className="font-medium">
-          {dayjs(updated_at).format('MMM D, YYYY')}
+          Ireland
         </span>
       </div>
+
       <div className="flex items-start text-dark dark:text-light">
         <strong className="flex w-36 flex-shrink-0 items-center font-normal text-dark-600 dark:text-light-600">
           <span className="w-8 flex-shrink-0 text-dark-900 dark:text-light-900">
             <CalenderIcon className="h-[18px] w-[18px]" />
           </span>
-          {t('text-published')}:
+          {t('text-posted')}:
         </strong>
         <span className="font-medium">
-          {dayjs(created_at).format('MMM D, YYYY')}
+          {dayjs(created_at).fromNow()}
         </span>
-      </div>
-      <div className="flex items-start text-dark dark:text-light">
-        <strong className="flex w-36 flex-shrink-0 items-center font-normal text-dark-600 dark:text-light-600">
-          <span className="w-8 flex-shrink-0 text-dark-900 dark:text-light-900">
-            {getIcon({
-              iconList: TypeIcons,
-              iconName: icon!,
-              className: 'h-[18px] w-[18px]',
-            })}
-          </span>
-          {t('text-layout')}:
-        </strong>
-        <span className="font-medium">{layoutType}</span>
       </div>
       {!!tags?.length && (
         <div className="flex items-start text-dark dark:text-light">

@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
   USERS_REGISTER: '/register',
   USERS_FORGOT_PASSWORD: '/forget-password',
   USERS_VERIFY_FORGOT_PASSWORD_TOKEN: '/verify-forget-password-token',
+  CREATE_ITEM: '/swaps/create-item',
   USERS_RESET_PASSWORD: '/reset-password',
   USERS_CHANGE_PASSWORD: '/change-password',
   USERS_LOGOUT: '/logout',

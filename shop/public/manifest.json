@@ -1,5 +1,5 @@
 {
-  "name": "Shwupit - Digital Product E-commerce",
+  "name": "Shwupit - Swap Smart, Swap Easy",
   "short_name": "pixer",
   "theme_color": "#348155",
   "background_color": "#595552",
@@ -7,7 +7,7 @@
   "orientation": "portrait",
   "scope": "/",
   "start_url": "/",
-  "description": "Digital Product E-commerce",
+  "description": "Your Ultimate Swapping Platform for Secure and Easy Exchanges.",
   "icons": [
     {
       "src": "icons/icon-192x192.png",

@@ -1,33 +1,76 @@
-import type { User } from '@/types';
-import useAuth from '@/components/auth/use-auth';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import client from './client';
-import { API_ENDPOINTS } from './client/endpoints';
+import { supabase } from '@/data/utils/supabaseClient';
 
 export function useMe() {
-  const { isAuthorized } = useAuth();
-  const { data, isLoading, error } = useQuery<User, Error>(
-    [API_ENDPOINTS.USERS_ME],
-    client.users.me,
-    {
-      enabled: isAuthorized,
+  const fetchUser = async () => {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      throw sessionError;
     }
-  );
+
+    const user = sessionData?.session?.user;
+    if (!user) {
+      throw new Error('Not authenticated');
+    }
+
+    // Fetching user data from the profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, country, username, email, currency, profile_picture_url, bio')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError) {
+      throw profileError;
+    }
+
+    // Combine the session data with profile data
+    return {
+      id: user.id,
+      username: profileData.username,
+      email: profileData.email,
+      firstName: profileData.first_name,
+      lastName: profileData.last_name,
+      country: profileData.country,
+      currency: profileData.currency,
+      profilePictureURL: profileData.profile_picture_url,
+      bio: profileData.bio,
+    };
+  };
+
+  const { data, isLoading, error, refetch } = useQuery('me', fetchUser, {
+    enabled: !!supabase.auth.getSession(),
+    staleTime: 5 * 60 * 1000, // Cache the data for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep the data in cache for 10 minutes
+  });
+
+  const isAuthorized = !!data && !error;
+
   return {
     me: data,
     isLoading,
     error,
     isAuthorized,
+    refetch,
   };
 }
 
 export function useLogout() {
-  const { unauthorize } = useAuth();
   const queryClient = useQueryClient();
-  return useMutation(client.users.logout, {
-    onSuccess: () => {
-      unauthorize();
-      queryClient.resetQueries(API_ENDPOINTS.USERS_ME);
+
+  return useMutation(
+    async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
     },
-  });
+    {
+      onSuccess: () => {
+        queryClient.resetQueries('me');
+        queryClient.invalidateQueries();
+      },
+    }
+  );
 }

@@ -325,6 +325,35 @@ html.dark .react-tel-input .country-list .country:hover {
   transform-origin: 50% 4px;
 }
 
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Stream Chat Specific Customizations */
+.str-chat__list {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.str-chat__input-flat {
+  background-color: #f0f0f0;
+  border-radius: 20px;
+}
+
 @keyframes ring {
   0% {
     transform: rotate(0);
@@ -430,3 +459,4 @@ html.dark .react-tel-input .country-list .country:hover {
     transform: translateY(0px) scale(1);
   }
 }
+

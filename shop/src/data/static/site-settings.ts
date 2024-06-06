@@ -1,9 +1,7 @@
-import lightModeLogo from '@/assets/images/logo-black.svg';
-import darkModeLogo from '@/assets/images/logo-white.svg';
+import logo from '@/assets/images/logo.png';
 
 export const siteSettings = {
-  lightLogo: lightModeLogo,
-  darkLogo: darkModeLogo,
+  logo: logo, 
   width: 128,
   height: 40,
 };

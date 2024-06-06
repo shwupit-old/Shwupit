@@ -6,35 +6,33 @@ import Scrollbar from '@/components/ui/scrollbar';
 import CartItemList from '@/components/cart/cart-item-list';
 import CartEmpty from '@/components/cart/cart-empty';
 import usePrice from '@/lib/hooks/use-price';
+import { useRemoveFromWishlist, useWishlist } from '@/data/wishlist';
+
+import { WishlistItem } from '@/pages/wishlists';
 import { useCart } from '@/components/cart/lib/cart.context';
 import { useDrawer } from '@/components/drawer-views/context';
 import { CloseIcon } from '@/components/icons/close-icon';
 import { useTranslation } from 'next-i18next';
 
+
 export default function CartDrawerView() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const { closeDrawer } = useDrawer();
-  const { total, isEmpty, language } = useCart();
+  const { wishlists } = useWishlist(); 
+  const { total, language } = useCart(); 
   const { price: totalPrice } = usePrice({
     amount: total,
   });
-  function handleCheckout() {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.push(routes.checkout, undefined, {
-        locale: language,
-      });
-      closeDrawer();
-    }, 600);
-  }
   const { t } = useTranslation('common');
+  const isEmpty = wishlists.length === 0; 
+
+  console.log("wish", wishlists)
   return (
     <>
       <div className="flex h-[70px] items-center justify-between py-2 px-5 sm:px-7">
         <h2 className="text-sm font-medium capitalize text-dark dark:text-light">
-          {t('text-shopping-cart')}
+          {t('text-saved')}
         </h2>
         <div className="ml-3 flex h-7 items-center">
           <button
@@ -48,9 +46,17 @@ export default function CartDrawerView() {
         </div>
       </div>
       <Scrollbar className="cart-scrollbar w-full flex-1 py-6 px-6 sm:px-7">
-        {!isEmpty ? <CartItemList /> : <CartEmpty />}
+
+      
+        {!isEmpty ? (
+          // console.log(wishlists : type)
+  wishlists.map((product) => <WishlistItem key={product.id} product={product} />)
+  
+) : (
+  <CartEmpty />
+)}
       </Scrollbar>
-      <div className="border-t border-light-300 px-5 py-6 dark:border-dark-500 sm:px-7 sm:pb-8 sm:pt-7">
+      {/* <div className="border-t border-light-300 px-5 py-6 dark:border-dark-500 sm:px-7 sm:pb-8 sm:pt-7">
         <div className="flex justify-between text-sm font-medium text-dark dark:text-light">
           <span>{t('text-subtotal')}:</span>
           <span>{totalPrice}</span>
@@ -65,7 +71,7 @@ export default function CartDrawerView() {
             {t('text-proceed-to-checkout')}
           </Button>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }
