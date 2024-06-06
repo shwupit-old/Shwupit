@@ -27,6 +27,7 @@ export default function CartDrawerView() {
   const { t } = useTranslation('common');
   const isEmpty = wishlists.length === 0; 
 
+  console.log("wish", wishlists)
   return (
     <>
       <div className="flex h-[70px] items-center justify-between py-2 px-5 sm:px-7">
@@ -45,9 +46,12 @@ export default function CartDrawerView() {
         </div>
       </div>
       <Scrollbar className="cart-scrollbar w-full flex-1 py-6 px-6 sm:px-7">
-        {/* TODO: Render wishlist items or display a message if the wishlist is empty */}
+
+      
         {!isEmpty ? (
+          // console.log(wishlists : type)
   wishlists.map((product) => <WishlistItem key={product.id} product={product} />)
+  
 ) : (
   <CartEmpty />
 )}

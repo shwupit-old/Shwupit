@@ -318,25 +318,46 @@ class Client {
       ),
   };
 
-  wishlist = {
-    all: (params: WishlistQueryOptions) =>
-      HttpClient.get<ProductPaginator>(API_ENDPOINTS.USERS_WISHLIST, {
-        with: 'shop',
-        orderBy: 'created_at',
-        sortedBy: 'desc',
-        ...params,
-      }),
-    toggle: (input: { product_id: string }) =>
-      HttpClient.post<{ in_wishlist: boolean }>(
-        API_ENDPOINTS.USERS_WISHLIST_TOGGLE,
-        input
-      ),
-    remove: (id: string) =>
-      HttpClient.delete<Wishlist>(`${API_ENDPOINTS.WISHLIST}/${id}`),
-    checkIsInWishlist: ({ product_id }: { product_id: string }) =>
-      HttpClient.get<boolean>(
-        `${API_ENDPOINTS.WISHLIST}/in_wishlist/${product_id}`
-      ),
+ wishlist = {
+    all: async (params?: WishlistQueryOptions): Promise<ProductPaginator[]> => {
+      const { data, error } = await supabase
+        .from('wishlist')
+        .select('*') 
+        .order('created_at', { ascending: false }); 
+      if (error) throw error;
+  
+      return data as ProductPaginator[];
+    },
+    
+    toggle: async (input: { product_id: string }): Promise<{ in_wishlist: boolean }> => {
+      const { data, error } = await supabase
+        .rpc('toggle_wishlist', { product_id: input.product_id }); 
+      if (error) throw error;
+  
+      return data as { in_wishlist: boolean };
+    },
+  
+    remove: async (id: string): Promise<Wishlist> => {
+      const { data, error } = await supabase
+        .from('wishlist')
+        .delete()
+        .eq('id', id)
+        .single();
+      if (error) throw error;
+  
+      return data as Wishlist;
+    },
+  
+    checkIsInWishlist: async ({ product_id }: { product_id: string }): Promise<boolean> => {
+      const { data, error } = await supabase
+        .from('wishlist')
+        .select('id')
+        .eq('product_id', product_id)
+        .single();
+      if (error) throw error;
+  
+      return data !== null;
+    },
   };
 
   myQuestions = {

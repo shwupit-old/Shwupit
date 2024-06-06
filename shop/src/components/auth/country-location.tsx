@@ -21,7 +21,7 @@ const CountryLocation: React.FC<CountryLocationProps> = ({ value, onCountrySelec
             country: item.country,
             iso2: item.iso2  // Assuming the response has iso2
           })));
-          console.log('Countries loaded:', response.data.data);
+        
         } else {
           console.error('Unexpected response structure:', response.data);
         }
