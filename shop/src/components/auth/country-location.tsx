@@ -73,7 +73,11 @@ const CountryLocation: React.FC<CountryLocationProps> = ({ value, onCountrySelec
     <div className="flex flex-col gap-1 w-full">
       <div
         className="flex-1"
-        onClick={(e) => e.stopPropagation()} // Stop event propagation here
+        onClick={(e) => {e.stopPropagation()
+          e.preventDefault()
+        }
+          
+        } // Stop event propagation here
       >
         <Dropdown
           label="Country"

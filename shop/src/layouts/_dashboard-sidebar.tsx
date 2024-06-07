@@ -32,12 +32,7 @@ const menuItems = [
   //   label: 'text-auth-swap-disputes',
   //   path: routes.purchases,
   // },
-  {
-    id: 3,
-    icon: <CreditCardIcon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />,
-    label: 'text-auth-cards',
-    path: routes.cards,
-  },
+
   // {
   //   id: 4,
   //   icon: <HeartFillIcon className="h-[15px] w-[15px] sm:h-4 sm:w-4" />,
@@ -63,30 +58,23 @@ const menuItems = [
   //   path: routes.followedShop,
   // },
   {
-    id: 7,
+    id: 2,
     icon: <LockIcon className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
     label: 'text-auth-password',
     path: routes.password,
   },
-  {
-    id: 8,
-    icon: <CreditCardIcon className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
-    label: 'Wallet',
-    path: routes.wallet,
-  },
+
 ];
 
 function SidebarNav() {
   const { mutate: logout } = useLogout();
   const { t } = useTranslation('common');
   const { me } = useMe();
-  const { price: currentWalletCurrency } = usePrice({
-    amount: Number(me?.wallet?.available_points_to_currency),
-  });
+
   return (
     <div className="flex h-full flex-col">
       <nav className="hidden grow flex-col text-13px text-dark-900 lg:flex">
-        {menuItems?.slice(0, -1)?.map((item) => (
+        {menuItems.map((item) => (
           <ActiveLink
             key={t(item?.label)}
             href={item?.path}
@@ -109,37 +97,7 @@ function SidebarNav() {
           </span>
         </button>
       </nav>
-      {me?.wallet ? (
-        <>
-          <div className="w-full border-t border-t-light-500 p-6 dark:border-t-dark-600">
-            <h2 className="mb-5 text-15px font-medium text-dark dark:text-light sm:mb-6">
-              Wallet Points
-            </h2>
-            <div className="flex flex-col space-y-4 divide-y divide-light-500 font-medium text-dark-100 dark:divide-dark-600 dark:text-light-400">
-              <div className="flex justify-between">
-                <p className="mb-0 opacity-50">{t('text-total')}</p>
-                <p className="mb-0">{me?.wallet?.total_points}</p>
-              </div>
-              <div className="flex justify-between pt-4">
-                <p className="mb-0 opacity-50">{t('text-used')}</p>
-                <p className="mb-0">{me?.wallet?.points_used}</p>
-              </div>
-              <div className="flex justify-between pt-4">
-                <p className="mb-0 opacity-50">{t('text-available')}</p>
-                <p className="mb-0">{me?.wallet?.available_points}</p>
-              </div>
-              <div className="flex justify-between pt-4">
-                <p className="mb-0 opacity-50">{t('text-balance')}</p>
-                <p className="mb-0">
-                  {currentWalletCurrency ? currentWalletCurrency : 0}
-                </p>
-              </div>
-            </div>
-          </div>
-        </>
-      ) : (
-        ''
-      )}
+    
     </div>
   );
 }

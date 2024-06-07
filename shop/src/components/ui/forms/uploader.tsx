@@ -1,14 +1,13 @@
 import type { Attachment } from '@/types';
 import cn from 'classnames';
-import client from '@/data/client';
 import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useMutation } from 'react-query';
 import Image from '@/components/ui/image';
 import { CloseIcon } from '@/components/icons/close-icon';
 import Button from '@/components/ui/button';
 import { SpinnerIcon } from '@/components/icons/spinner-icon';
 import { PlusIcon } from '@/components/icons/plus-icon';
+import { supabase } from '@/data/utils/supabaseClient';
 
 function getDefaultValues(attachment: Attachment[] | null) {
   if (!attachment) return null;
@@ -21,33 +20,66 @@ export default function Uploader({
   name,
   onBlur,
   multiple = true,
+  userId,
 }: any) {
   let [attachments, setAttachments] = useState<Attachment[] | null>(
     getDefaultValues(value)
   );
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     setAttachments(getDefaultValues(value));
   }, [value]);
 
-  const { mutate, isLoading } = useMutation(client.settings.upload, {
-    onSuccess: (response) => {
-      const data = multiple ? response : response[0];
-      onChange(data);
-      setAttachments(response);
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
+  const uploadToSupabase = async (files: File[]) => {
+    const uploadedFiles: Attachment[] = [];
+    for (const file of files) {
+      const { data, error } = await supabase.storage
+        .from('images')
+        .upload(`profile_picture/${userId}/${file.name}`, file);
+
+      if (error) {
+        console.error("Supabase upload error:", error.message);
+        throw error;
+      }
+
+      if (data) {
+        const { data: publicUrlData } = supabase.storage
+          .from('images')
+          .getPublicUrl(data.path);
+        const publicUrl = publicUrlData.publicUrl;
+
+        uploadedFiles.push({
+          id: data.path,
+          original: publicUrl,
+          thumbnail: publicUrl,
+          imagePath: data.path,
+        });
+      }
+    }
+    return uploadedFiles;
+  };
+
   const onDrop = useCallback(
-    (acceptedFiles: any) => {
-      mutate(acceptedFiles);
+    async (acceptedFiles: File[]) => {
+      setIsLoading(true);
+      try {
+        const uploadedFiles = await uploadToSupabase(acceptedFiles);
+        const data = multiple ? uploadedFiles : uploadedFiles[0];
+        onChange(data);
+        setAttachments(uploadedFiles);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [mutate]
+    [multiple, onChange, userId]
   );
+
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
-      'image/*': []
+      'image/*': [],
     },
     multiple,
     onDrop,
@@ -66,6 +98,8 @@ export default function Uploader({
     setAttachments(newAttachments);
     const data = multiple ? newAttachments : newAttachments[0];
     onChange(data);
+
+    supabase.storage.from('images').remove([id]).catch(console.error);
   }
 
   return (

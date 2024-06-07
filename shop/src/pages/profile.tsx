@@ -21,7 +21,7 @@ import Uploader from '@/components/ui/forms/uploader';
 import CountryLocation from '@/components/auth/country-location';
 import * as yup from 'yup';
 import { useEffect } from 'react';
-import { supabase } from '@/data/utils/supabaseClient';
+import useAuth from '@/components/auth/use-auth';
 
 const profileValidationSchema = yup.object().shape({
   id: yup.string().required(),
@@ -47,6 +47,7 @@ const ProfilePage: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
   const queryClient = useQueryClient();
   const { me } = useMe();
+  const { user } = useAuth(); // Use useAuth hook to get the user
   const { mutate, isLoading } = useMutation(client.users.update, {
     onSuccess: () => {
       toast.success(<b>{t('text-profile-page-success-toast')}</b>, {
@@ -64,7 +65,10 @@ const ProfilePage: NextPageWithLayout = () => {
     },
   });
 
-  const onSubmit: SubmitHandler<UpdateUserInput> = (data) => mutate(data);
+  const onSubmit: SubmitHandler<UpdateUserInput> = (data) => {
+    console.log(data);
+    return mutate(data);
+  };
 
   return (
     <motion.div
@@ -93,7 +97,6 @@ const ProfilePage: NextPageWithLayout = () => {
         className="flex flex-grow flex-col"
       >
         {({ register, reset, control, setValue, formState: { errors } }) => {
-          // Reset form values when `me` changes
           useEffect(() => {
             if (me) {
               reset({
@@ -119,10 +122,10 @@ const ProfilePage: NextPageWithLayout = () => {
                   render={({ field: { ref, ...rest } }) => (
                     <div className="sm:col-span-2">
                       <span className="block cursor-pointer pb-2.5 font-normal text-dark/70 dark:text-light/70">
-                        {t('text-profile-avatar')}
+                        {t('text-profile-image')}
                       </span>
                       <div className="text-xs">
-                        <Uploader {...rest} multiple={false} />
+                        <Uploader {...rest} multiple={false} userId={me?.id} />
                       </div>
                     </div>
                   )}
