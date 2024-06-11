@@ -48,9 +48,6 @@ export default function Uploader({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log('Initial URL:', initialUrl);
-    console.log('Value:', value);
-
     if (initialUrl) {
       setAttachments([getInitialAttachment(initialUrl)]);
     } else if (value && value.length > 0) {
@@ -153,7 +150,7 @@ export default function Uploader({
           className: cn(
             'relative border-dashed border-2 border-light-500 dark:border-dark-600 text-center flex flex-col justify-center hover:text-black dark:hover:text-light items-center cursor-pointer focus:border-accent-400 focus:outline-none',
             {
-              'h-36 w-full rounded': multiple === false,
+              'h-36 w-full': multiple === false,
             }
           ),
         })}
@@ -184,8 +181,6 @@ export default function Uploader({
                 onClick={(e) => {
                   e.stopPropagation();
                   remove(id);
-                  setAttachments(null);  // Clear the attachment state
-                  onChange(null);  // Clear the uploader value
                 }}
                 variant="icon"
                 className="absolute right-0 top-0 p-3"

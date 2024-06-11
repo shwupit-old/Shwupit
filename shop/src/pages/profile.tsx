@@ -22,6 +22,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/data/utils/supabaseClient';
 import dayjs from 'dayjs';
 import useAuth from '@/components/auth/use-auth';
+import { useRouter } from 'next/router';
 
 const profileValidationSchema = yup.object().shape({
   id: yup.string().required(),
@@ -48,12 +49,13 @@ const ProfilePage: NextPageWithLayout = () => {
   const queryClient = useQueryClient();
   const { me } = useMe();
   const { user } = useAuth();
+  const router = useRouter();
   const [canChangeUsername, setCanChangeUsername] = useState(true);
   const [usernameChangeDaysLeft, setUsernameChangeDaysLeft] = useState(0);
 
   useEffect(() => {
-    if (me?.lastUsernameChange) {
-      const lastChangeDate = dayjs(me.lastUsernameChange);
+    if (me?.last_username_change) {
+      const lastChangeDate = dayjs(me.last_username_change);
       const nextAllowedChangeDate = lastChangeDate.add(30, 'day');
       const now = dayjs();
       const difference = nextAllowedChangeDate.diff(now, 'day');
@@ -81,6 +83,7 @@ const ProfilePage: NextPageWithLayout = () => {
           currency: data.currency,
           profile_picture_url: profilePictureURL,
           bio: data.bio,
+          last_username_change: data.username !== me?.username ? new Date() : me?.last_username_change,
         })
         .eq('id', data.id);
 
@@ -111,6 +114,10 @@ const ProfilePage: NextPageWithLayout = () => {
     }
 
     mutate(data);
+  };
+
+  const handleCancel = () => {
+    router.push('/');
   };
 
   return (
@@ -190,12 +197,13 @@ const ProfilePage: NextPageWithLayout = () => {
                   label={t('text-profile-bio')}
                   {...register('bio')}
                   error={errors.bio?.message && 'bio field is required'}
-                  className="sm:col-span-2 rounded-none"
+                  className="sm:col-span-2"
                 />
                 <Input
                   label="Username"
                   {...register('username')}
                   error={errors.username?.message}
+                  disabled={!canChangeUsername}
                 />
                 <Input
                   label="First Name"
@@ -231,20 +239,8 @@ const ProfilePage: NextPageWithLayout = () => {
               </fieldset>
               <div className="mt-auto flex items-center gap-4 pb-3 lg:justify-end">
                 <Button
-                  type="reset"
-                  onClick={() =>
-                    reset({
-                      id: me?.id,
-                      username: '',
-                      firstName: '',
-                      lastName: '',
-                      email: '',
-                      country: '',
-                      currency: '',
-                      profilePictureURL: null,
-                      bio: '',
-                    })
-                  }
+                  type="button"
+                  onClick={handleCancel}
                   disabled={isLoading}
                   variant="outline"
                   className="flex-1 lg:flex-none"

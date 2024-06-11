@@ -39,8 +39,8 @@ type AvatarProps = {
 const CHECK_VALID_CUSTOM_SIZE = /(\d*px)?/g;
 
 function getInitials(firstName: string, lastName: string) {
-  if (!firstName && !lastName) return 'GU';
   const initials = (firstName[0] || '') + (lastName[0] || '');
+  if (!firstName && !lastName) return initials.toUpperCase();
   return initials.toUpperCase();
 }
 
@@ -56,6 +56,7 @@ const Avatar: React.FC<AvatarProps> = ({
   const [isError, setError] = React.useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [profilePictureURL, setProfilePictureURL] = useState('');
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -69,16 +70,38 @@ const Avatar: React.FC<AvatarProps> = ({
 
         const { data, error } = await supabase
           .from('profiles')
-          .select('first_name, last_name')
+          .select('first_name, last_name, profile_picture_url')
           .eq('id', user.id)
           .single();
 
         if (error) throw error;
 
-  
-
         setFirstName(data.first_name);
         setLastName(data.last_name);
+        setProfilePictureURL(data.profile_picture_url);
+
+        // Set up real-time listener for profile updates
+        const channel = supabase
+          .channel('custom-all-channel')
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'profiles',
+              filter: `id=eq.${user.id}`,
+            },
+            (payload: any) => {
+              setProfilePictureURL(payload.new.profile_picture_url);
+              setFirstName(payload.new.first_name);
+              setLastName(payload.new.last_name);
+            }
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(channel);
+        };
       } catch (error) {
         console.error('Error fetching user profile:', error);
       }
@@ -98,7 +121,9 @@ const Avatar: React.FC<AvatarProps> = ({
     }
   }
 
-  if (src && !isError) {
+  const imageSrc = src || profilePictureURL;
+
+  if (imageSrc && !isError) {
     return (
       <div
         className={twMerge(
@@ -118,7 +143,7 @@ const Avatar: React.FC<AvatarProps> = ({
       >
         <Image
           alt={`${firstName} ${lastName}`}
-          src={src}
+          src={imageSrc}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add the sizes prop for performance improvement
           priority={true}

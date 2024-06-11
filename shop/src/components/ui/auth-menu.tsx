@@ -15,7 +15,7 @@ export default function AuthorizedMenu({ user }: { user: User }) {
   return (
     <Menu>
       <Menu.Button className="relative inline-flex h-8 w-8 justify-center rounded-full border border-light-400 bg-light-300 dark:border-dark-500 dark:bg-dark-500">
-      <Avatar
+        <Avatar
           size='sm'
           firstName={user.firstName}
           lastName={user.lastName}
@@ -31,7 +31,12 @@ export default function AuthorizedMenu({ user }: { user: User }) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute top-[84%] z-30 mt-4 w-56 rounded-md bg-light py-1.5 text-dark shadow-dropdown ltr:right-0 ltr:origin-top-right rtl:left-0 rtl:origin-top-left dark:bg-dark-250 dark:text-light">
+        <Menu.Items className="absolute top-[84%] z-30 mt-4 w-56 bg-light py-1.5 text-dark shadow-dropdown ltr:right-0 ltr:origin-top-right rtl:left-0 rtl:origin-top-left dark:bg-dark-250 dark:text-light">
+          <div className="px-5 py-2 text-sm text-gray-900 dark:text-white">
+            <div>{`${user.firstName} ${user.lastName}`}</div>
+            <div className="text-xs truncate">{user.username}</div>
+          </div>
+          <hr className="border-t border-gray-200 dark:border-gray-600" />
           {AuthorizedMenuItems?.map((item) => (
             <Menu.Item key={item.label}>
               <ActiveLink
