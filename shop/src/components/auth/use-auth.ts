@@ -9,7 +9,7 @@ import {
 } from '@/data/client/token.utils';
 
 const authorizationAtom = atom(checkHasAuthToken());
-const userAtom = atom(null);
+const userAtom = atom(null);  
 
 export default function useAuth() {
   const [isAuthorized, setAuthorized] = useAtom(authorizationAtom);

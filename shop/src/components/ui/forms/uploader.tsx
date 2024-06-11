@@ -2,16 +2,35 @@ import type { Attachment } from '@/types';
 import cn from 'classnames';
 import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import Image from '@/components/ui/image';
+import Image from 'next/image';
 import { CloseIcon } from '@/components/icons/close-icon';
 import Button from '@/components/ui/button';
 import { SpinnerIcon } from '@/components/icons/spinner-icon';
-import { PlusIcon } from '@/components/icons/plus-icon';
 import { supabase } from '@/data/utils/supabaseClient';
+import Compressor from 'compressorjs';
 
-function getDefaultValues(attachment: Attachment[] | null) {
+function getDefaultValues(attachment: Attachment[] | null): Attachment[] | null {
   if (!attachment) return null;
   return Array.isArray(attachment) ? attachment : [attachment];
+}
+
+function getInitialAttachment(url: string): Attachment {
+  return {
+    id: 'initial',
+    original: url,
+    thumbnail: url,
+    imagePath: 'initial',
+  };
+}
+
+interface UploaderProps {
+  onChange: (attachments: Attachment[] | null) => void;
+  value: Attachment[] | null;
+  name: string;
+  onBlur: () => void;
+  multiple?: boolean;
+  userId: string;
+  initialUrl?: string;
 }
 
 export default function Uploader({
@@ -21,22 +40,50 @@ export default function Uploader({
   onBlur,
   multiple = true,
   userId,
-}: any) {
-  let [attachments, setAttachments] = useState<Attachment[] | null>(
-    getDefaultValues(value)
+  initialUrl,
+}: UploaderProps) {
+  const [attachments, setAttachments] = useState<Attachment[] | null>(
+    initialUrl ? [getInitialAttachment(initialUrl)] : getDefaultValues(value)
   );
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setAttachments(getDefaultValues(value));
-  }, [value]);
+    console.log('Initial URL:', initialUrl);
+    console.log('Value:', value);
+
+    if (initialUrl) {
+      setAttachments([getInitialAttachment(initialUrl)]);
+    } else if (value && value.length > 0) {
+      setAttachments(getDefaultValues(value));
+    } else {
+      setAttachments(null);
+    }
+  }, [value, initialUrl]);
+
+  const compressImage = (file: File): Promise<File> =>
+    new Promise((resolve, reject) => {
+      new Compressor(file, {
+        quality: 0.6,
+        success(result) {
+          const compressedFile = new File([result], file.name, {
+            type: file.type,
+            lastModified: Date.now(),
+          });
+          resolve(compressedFile);
+        },
+        error(err) {
+          reject(err);
+        },
+      });
+    });
 
   const uploadToSupabase = async (files: File[]) => {
     const uploadedFiles: Attachment[] = [];
     for (const file of files) {
+      const compressedFile = await compressImage(file);
       const { data, error } = await supabase.storage
         .from('images')
-        .upload(`profile_picture/${userId}/${file.name}`, file);
+        .upload(`profile_picture/${userId}/${compressedFile.name}`, compressedFile);
 
       if (error) {
         console.error("Supabase upload error:", error.message);
@@ -44,10 +91,7 @@ export default function Uploader({
       }
 
       if (data) {
-        const { data: publicUrlData } = supabase.storage
-          .from('images')
-          .getPublicUrl(data.path);
-        const publicUrl = publicUrlData.publicUrl;
+        const { publicUrl } = supabase.storage.from('images').getPublicUrl(data.path).data;
 
         uploadedFiles.push({
           id: data.path,
@@ -65,8 +109,7 @@ export default function Uploader({
       setIsLoading(true);
       try {
         const uploadedFiles = await uploadToSupabase(acceptedFiles);
-        const data = multiple ? uploadedFiles : uploadedFiles[0];
-        onChange(data);
+        onChange(uploadedFiles);
         setAttachments(uploadedFiles);
       } catch (error) {
         console.error(error);
@@ -74,7 +117,7 @@ export default function Uploader({
         setIsLoading(false);
       }
     },
-    [multiple, onChange, userId]
+    [onChange, userId]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -85,21 +128,22 @@ export default function Uploader({
     onDrop,
   });
 
-  function remove(id: string) {
+  async function remove(id: string) {
     if (!attachments) return;
     const newAttachments = attachments.filter(
       (attachment) => attachment.id !== id
     );
-    if (!newAttachments.length) {
-      setAttachments(null);
-      onChange(null);
-      return;
-    }
-    setAttachments(newAttachments);
-    const data = multiple ? newAttachments : newAttachments[0];
-    onChange(data);
+    setAttachments(newAttachments.length ? newAttachments : null);
+    onChange(newAttachments.length ? newAttachments : null);
 
-    supabase.storage.from('images').remove([id]).catch(console.error);
+    try {
+      const { error } = await supabase.storage.from('images').remove([id]);
+      if (error) {
+        console.error("Error removing file from Supabase storage:", error.message);
+      }
+    } catch (error) {
+      console.error("Error removing file:", error);
+    }
   }
 
   return (
@@ -109,7 +153,6 @@ export default function Uploader({
           className: cn(
             'relative border-dashed border-2 border-light-500 dark:border-dark-600 text-center flex flex-col justify-center hover:text-black dark:hover:text-light items-center cursor-pointer focus:border-accent-400 focus:outline-none',
             {
-              'h-20 w-20 rounded-md shrink-0': multiple === true,
               'h-36 w-full rounded': multiple === false,
             }
           ),
@@ -121,69 +164,43 @@ export default function Uploader({
             onBlur,
           })}
         />
-        {multiple !== true
-          ? Array.isArray(attachments)
-            ? attachments.map(({ id, original }) => (
-                <div key={id}>
-                  <div className="relative h-20 w-20 overflow-hidden rounded-full">
-                    <Image
-                      alt="Avatar"
-                      src={original}
-                      fill
-                      className="object-scale-down"
-                    />
-                  </div>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      remove(id);
-                    }}
-                    variant="icon"
-                    className="absolute right-0 top-0 p-3"
-                  >
-                    <CloseIcon className="h-4 w-4 3xl:h-5 3xl:w-5" />
-                  </Button>
-                </div>
-              ))
-            : 'Upload Your Profile Picture'
-          : !isLoading && <PlusIcon className="h-5 w-5" />}
-
-        {isLoading && (
-          <span className="mt-2.5 flex items-center gap-1 font-medium text-light-500">
-            <SpinnerIcon className="h-auto w-5 animate-spin text-brand" />{' '}
-            {multiple !== true && 'Loading...'}
-          </span>
+        {!isLoading && (!attachments || attachments.length === 0) && (
+          <span>Upload Your Profile Picture</span>
         )}
-      </div>
-      {Array.isArray(attachments) &&
-        multiple === true &&
-        attachments.map(({ id, original }) => (
-          <div
-            key={id}
-            className="group relative h-20 w-20 overflow-hidden rounded-md"
-          >
-            <div className="relative h-full w-full overflow-hidden rounded-md">
-              <Image
-                alt="Attachment"
-                src={original}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="absolute right-0 top-0 flex h-full w-full items-center justify-center bg-dark/60 opacity-0 transition-all group-hover:opacity-100">
+        {attachments && attachments.length > 0 && !isLoading &&
+          attachments.map(({ id, original }) => (
+            <div key={id}>
+              <div className="relative h-20 w-20 overflow-hidden rounded-full">
+                <Image
+                  alt="Avatar"
+                  src={original}
+                  layout="fill"
+                  objectFit="cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="rounded-full"
+                />
+              </div>
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
                   remove(id);
+                  setAttachments(null);  // Clear the attachment state
+                  onChange(null);  // Clear the uploader value
                 }}
                 variant="icon"
-                className="h-9 w-9 rounded-full bg-dark/60"
+                className="absolute right-0 top-0 p-3"
               >
-                <CloseIcon className="h-4 w-4" />
+                <CloseIcon className="h-4 w-4 3xl:h-5 3xl:w-5" />
               </Button>
             </div>
-          </div>
-        ))}
+          ))}
+        {isLoading && (
+          <span className="mt-2.5 flex items-center gap-1 font-medium text-light-500">
+            <SpinnerIcon className="h-auto w-5 animate-spin text-brand" />{' '}
+            Loading...
+          </span>
+        )}
+      </div>
     </div>
   );
 }

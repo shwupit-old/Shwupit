@@ -113,6 +113,12 @@ export interface SEO {
   metaTags: string;
   canonicalUrl: string;
 }
+export interface Attachment {
+  id: string;
+  thumbnail: string;
+  original: string;
+  imagePath: string;
+}
 
 export interface Settings {
   id: string;
@@ -186,12 +192,6 @@ export interface Shop {
     email: string;
   };
 }
-export interface Attachment {
-  id: string;
-  thumbnail: string;
-  original: string;
-  imagePath: string;
-}
 
 export interface User {
   id: string;
@@ -206,6 +206,7 @@ export interface User {
   savedItems: string[];
   currency: string;
   bio: string;
+  lastUsernameChange: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -305,16 +306,13 @@ export const mapSupabaseUserToUser = (supabaseUser: SupabaseUser | null): User =
     currency: supabaseUser.user_metadata?.currency || '',
     bio: supabaseUser.user_metadata?.bio || '',
     createdAt: supabaseUser.created_at || '',
+    lastUsernameChange: supabaseUser.created_at || '',
     updatedAt: supabaseUser.updated_at || '',
   };
 };
 
-export interface Attachment {
-  id: string;
-  thumbnail: string;
-  original: string;
-  imagePath: string;
-}
+
+
 
 export interface ChangePasswordInput {
   oldPassword: string;

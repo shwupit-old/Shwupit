@@ -15,7 +15,7 @@ import DrawersContainer from '@/components/drawer-views/container';
 import SearchView from '@/components/search/search-view';
 import DefaultSeo from '@/layouts/_default-seo';
 import { SearchProvider } from '@/components/search/search.context';
-import { HeaderProvider } from '@/contexts/header-context';
+
 // base css file
 import '@/assets/css/scrollbar.css';
 import '@/assets/css/swiper-carousel.css';

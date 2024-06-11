@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import cn from 'classnames';
 import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
-import { supabase } from '@/data/utils/supabaseClient'; // Adjust the path as needed
+import { supabase } from '@/data/utils/supabaseClient';
 
 const classes = {
   base: 'inline-flex items-center justify-center flex-shrink-0 border text-accent border-border-100 bg-accent/10 overflow-hidden relative',

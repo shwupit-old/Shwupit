@@ -17,7 +17,7 @@ export function useMe() {
     // Fetching user data from the profiles table
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('first_name, last_name, country, username, email, currency, profile_picture_url, bio')
+      .select('first_name, last_name, country, username, email, currency, profile_picture_url, bio, last_username_change')
       .eq('id', user.id)
       .single();
 
@@ -35,6 +35,7 @@ export function useMe() {
       country: profileData.country,
       currency: profileData.currency,
       profilePictureURL: profileData.profile_picture_url,
+      lastUsernameChange: profileData.last_username_change,
       bio: profileData.bio,
     };
   };
