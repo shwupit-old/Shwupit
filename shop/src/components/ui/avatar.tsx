@@ -145,6 +145,7 @@ const Avatar: React.FC<AvatarProps> = ({
           alt={`${firstName} ${lastName}`}
           src={imageSrc}
           fill
+          className='object-cover object-center'
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add the sizes prop for performance improvement
           priority={true}
           onError={() => setError(true)}
