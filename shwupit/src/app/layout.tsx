@@ -22,6 +22,7 @@ import { Label } from "~/components/ui/label";
 import { Checkbox } from "~/components/ui/checkbox";
 import Link from "next/link";
 import AuthenticationDialog from "~/components/ui/authentication/dialog/authentication-dialog";
+import { AuthProvider } from "~/providers";
 
 export const metadata = {
   title: "Create T3 App",
@@ -36,76 +37,77 @@ export default async function RootLayout({
 }) {
 
   const session = await getServerAuthSession();
-
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
         <TRPCReactProvider>
-          <nav className="app-header sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-light-300 bg-light py-1 px-4 ltr:left-0 rtl:right-0 dark:border-dark-300 dark:bg-dark-250 sm:h-[70px] sm:px-6">
-            <div className="left--side flex items-center gap-4">
-              <Hamburger className="hidden md:block" />
-              <Image src={'/logo.png'}  alt="Shwupit Logo" width={100} height={60} />
-            </div>
-            <div className="right--side flex items-center gap-5 pr-0.5 xs:gap-6 sm:gap-7">
-              {session ? (
-                <>
-                  <NotificationBell />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+          <AuthProvider>
+            <nav className="app-header sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-light-300 bg-light py-1 px-4 ltr:left-0 rtl:right-0 dark:border-dark-300 dark:bg-dark-250 sm:h-[70px] sm:px-6">
+              <div className="left--side flex items-center gap-4">
+                <Hamburger className="hidden md:block" />
+                <Image src={'/logo.png'}  alt="Shwupit Logo" width={100} height={60} />
+              </div>
+              <div className="right--side flex items-center gap-5 pr-0.5 xs:gap-6 sm:gap-7">
+                {session ? (
+                  <>
+                    <NotificationBell />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button>
+                          <Avatar className="border text-accent border-border-100 rounded-full">
+                            <AvatarImage />
+                            <AvatarFallback className="bg-accent/10 border text-accent border-border-100 text-xs rounded-full font-semibold">DH</AvatarFallback>
+                          </Avatar>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="mt-4 w-56 bg-light py-1.5 text-dark shadow-dropdown ltr:right-0 ltr:origin-top-right rtl:left-0 rtl:origin-top-left dark:bg-dark-250 dark:text-light">
+                      <DropdownMenuGroup>
+                          <DropdownMenuItem className="flex flex-col items-start">
+                            <div className="">
+                              John Doe
+                            </div>
+                            <div className="">
+                              @johndoe
+                            </div>
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                        <DropdownMenuSeparator className="border-t border-gray-200 dark:border-gray-600" />
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem>
+                            test
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
+                )
+                : (
+                  <>
+                  <Dialog>
+                    <DialogTrigger asChild>
                       <Button>
                         <Avatar className="border text-accent border-border-100 rounded-full">
-                          <AvatarImage />
-                          <AvatarFallback className="bg-accent/10 border text-accent border-border-100 text-xs rounded-full font-semibold">DH</AvatarFallback>
+                          <AvatarFallback className="bg-accent/10 border text-accent border-border-100 text-xs rounded-full font-semibold"></AvatarFallback>
                         </Avatar>
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="mt-4 w-56 bg-light py-1.5 text-dark shadow-dropdown ltr:right-0 ltr:origin-top-right rtl:left-0 rtl:origin-top-left dark:bg-dark-250 dark:text-light">
-                    <DropdownMenuGroup>
-                        <DropdownMenuItem className="flex flex-col items-start">
-                          <div className="">
-                            John Doe
-                          </div>
-                          <div className="">
-                            @johndoe
-                          </div>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                      <DropdownMenuSeparator className="border-t border-gray-200 dark:border-gray-600" />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                          test
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </>
-              )
-              : (
-                <>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Avatar className="border text-accent border-border-100 rounded-full">
-                        <AvatarFallback className="bg-accent/10 border text-accent border-border-100 text-xs rounded-full font-semibold"></AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-light px-6 pt-10 pb-8 dark:bg-dark-300 sm:px-8 lg:p-12">
-                    <AuthenticationDialog />
-                  </DialogContent>
-                </Dialog>
-                </>
-              )
-            }
-            </div>
-          </nav>
-          {children}
-          <nav className="block md:hidden sticky bottom-0 z-30 grid h-14 w-full auto-cols-fr grid-flow-col items-center bg-light py-2 text-center shadow-bottom-nav dark:bg-dark-250 justify-items-center">
-            <HomeButton />
-            <MessagesButton />
-            <SearchIcon width={24} />
-            <Hamburger />
-          </nav>
+                    </DialogTrigger>
+                    <DialogContent className="bg-light px-6 pt-10 pb-8 dark:bg-dark-300 sm:px-8 lg:p-12">
+                      <AuthenticationDialog />
+                    </DialogContent>
+                  </Dialog>
+                  </>
+                )
+              }
+              </div>
+            </nav>
+            {children}
+            <nav className="block md:hidden sticky bottom-0 z-30 grid h-14 w-full auto-cols-fr grid-flow-col items-center bg-light py-2 text-center shadow-bottom-nav dark:bg-dark-250 justify-items-center">
+              <HomeButton />
+              <MessagesButton />
+              <SearchIcon width={24} />
+              <Hamburger />
+            </nav>
+          </AuthProvider>
         </TRPCReactProvider>
       </body>
     </html>

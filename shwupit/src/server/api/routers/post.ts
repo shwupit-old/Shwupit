@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NextResponse } from "next/server";
 
 import {
   createTRPCRouter,
@@ -14,6 +15,23 @@ export const postRouter = createTRPCRouter({
       return {
         greeting: `Hello ${input.text}`,
       };
+    }),
+
+  login: publicProcedure
+    .input(z.object({ email: z.string(), password: z.string() }))
+    .query(async ({ ctx, input }) => {
+      // error code => 500
+      // const user = await ctx.db.query.users.findFirst({
+      //   where: {
+      //     email: input.email,
+      //     password: input.password,
+      //   },
+      // });
+
+      // console.log("user", user);
+
+      // return NextResponse.json({ message: "User logged in", status: 200 });
+      return true;
     }),
 
   create: protectedProcedure

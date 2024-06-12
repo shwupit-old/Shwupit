@@ -62,12 +62,18 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
-      credentials: {},
-
+      credentials: {
+        // id: { label: "ID", type: "text" },
+      },
       async authorize(credentials) {
-        const user = { id: 1 }
-        console.log('credentials', credentials)
-        return user;
+        // return null;
+        const { email, password } = credentials
+        console.log("WOW", email, password)
+        return { id: 1 };
+        // return { id: credentials.id }
+        // const user = { id: 1 }
+        // console.log('credentials', credentials)
+        // return user;
       }
     }),
     // DiscordProvider({
