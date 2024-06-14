@@ -8,14 +8,14 @@ import { type Adapter } from "next-auth/adapters";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { env } from "~/env";
-import { db } from "~/server/db";
+import { env } from "@/env";
+import { db } from "@/server/db";
 import {
   accounts,
   sessions,
   users,
   verificationTokens,
-} from "~/server/db/schema";
+} from "@/server/db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

@@ -1,20 +1,20 @@
 "use client"
 
 import Link from "next/link";
-import { Checkbox } from "~/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Button } from "~/components/ui/button";
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { useMutation } from "@tanstack/react-query";
-import { attemptLogin } from "~/actions";
+import { attemptLogin } from "@/actions";
 import { signIn } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useRouter } from "next/router";

@@ -1,4 +1,4 @@
-// import Button from '~/components/button';
+import { Button } from "./button";
 
 interface HamburgerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isToggle?: boolean;
@@ -6,12 +6,12 @@ interface HamburgerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export default function Hamburger({ isToggle, ...props }: HamburgerProps) {
   return (
-    <button {...props}>
-    <svg
+    <Button variant="icon" aria-label="Hamburger" {...props}>
+      <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
-        stroke="currentColor"
+        stroke="grey"
         className="h-6 w-6"
       >
         <path
@@ -22,6 +22,6 @@ export default function Hamburger({ isToggle, ...props }: HamburgerProps) {
           d={isToggle ? 'M4 6h16M4 12h8m-8 6h16' : 'M4 6h16M4 12h16M4 18h16'}
         />
       </svg>
-    </button>
+    </Button>
   );
 }

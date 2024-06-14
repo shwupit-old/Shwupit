@@ -1,28 +1,29 @@
-import "~/styles/globals.css";
+import "@/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 
-import { TRPCReactProvider } from "~/trpc/react";
+import { TRPCReactProvider } from "@/trpc/react";
 import Image from "next/image";
 
-import Hamburger from "~/components/ui/hamburger";
-import { SearchIcon } from "~/components/ui/search-button";
-import NotificationBell from "~/components/ui/notification-bell";
-import { Avatar } from "~/components/ui/avatar";
-import { AvatarImage } from "~/components/ui/avatar";
-import { AvatarFallback } from "~/components/ui/avatar";
-import MessagesButton from "~/components/ui/messages-button";
-import HomeButton from "~/components/ui/home-button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
-import { Button } from "~/components/ui/button";
-import { getServerAuthSession } from "~/server/auth";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Checkbox } from "~/components/ui/checkbox";
+import Hamburger from "@/components/ui/hamburger";
+import { SearchIcon } from "@/components/ui/search-icon";
+import NotificationButton from "@/components/notifications/notification-button";
+import { HeartOutlineIcon } from "@/components/icons/heart-outline";
+import { Avatar } from "@/components/ui/avatar";
+import { AvatarImage } from "@/components/ui/avatar";
+import { AvatarFallback } from "@/components/ui/avatar";
+import ChatIcon from "@/components/icons/chat-icon";
+import { HomeIcon } from "@/components/icons/home-icon";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { getServerAuthSession } from "@/server/auth";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
-import AuthenticationDialog from "~/components/ui/authentication/dialog/authentication-dialog";
-import { AuthProvider } from "~/providers";
+import AuthenticationDialog from "@/components/authentication/dialog/authentication-dialog";
+import { AuthProvider } from "@/providers";
 
 export const metadata = {
   title: "Shwupit",
@@ -42,7 +43,7 @@ export default async function RootLayout({
       <body>
         <TRPCReactProvider>
           <AuthProvider>
-            <nav className="app-header sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-light-300 bg-light py-1 px-4 ltr:left-0 rtl:right-0 dark:border-dark-300 dark:bg-dark-250 sm:h-[70px] sm:px-6">
+            <nav className="app-header sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-light-300 bg-light py-1 pl-4 ltr:left-0 rtl:right-0 dark:border-dark-300 dark:bg-dark-250 sm:h-[70px] sm:px-6">
               <div className="left--side flex items-center gap-4">
                 <Hamburger className="hidden md:block" />
                 <Image src={'/logo.png'}  alt="Shwupit Logo" width={100} height={60} />
@@ -50,7 +51,7 @@ export default async function RootLayout({
               <div className="right--side flex items-center gap-5 pr-0.5 xs:gap-6 sm:gap-7">
                 {session ? (
                   <>
-                    <NotificationBell />
+                    <NotificationButton />
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button>
@@ -102,9 +103,9 @@ export default async function RootLayout({
             </nav>
             {children}
             <nav className="block md:hidden sticky bottom-0 z-30 grid h-14 w-full auto-cols-fr grid-flow-col items-center bg-light py-2 text-center shadow-bottom-nav dark:bg-dark-250 justify-items-center">
-              <HomeButton />
-              <MessagesButton />
-              <SearchIcon width={24} />
+            <HomeIcon className="h-[18px] w-[18px] text-current grey" />
+              <HeartOutlineIcon className= "h-[18px] w-[18px] text-current grey"/>
+              <SearchIcon className="h-[19px] w-[19px] text-current grey" />
               <Hamburger />
             </nav>
           </AuthProvider>
